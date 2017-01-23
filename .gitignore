@@ -1,0 +1,17 @@
+*~
+*.wlf
+*.vstf
+*.log
+*transcript
+work
+*.dbg
+*.ucdb
+*htmlreport
+testlist
+VRMDATA
+.metadata*
+linux
+*.err
+certe_dump.xml
+*#
+*debuglog.txt
