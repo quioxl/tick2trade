@@ -85,7 +85,7 @@ class host_item extends uvm_sequence_item;
     host_item rhs_;
 
     if(!$cast(rhs_, rhs)) begin
-      `uvm_error(report_id, "Cast failed in do_copy()");
+      `uvm_fatal(report_id, "Cast failed in do_copy()");
       return;
     end
     

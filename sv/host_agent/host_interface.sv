@@ -14,8 +14,7 @@ interface host_interface();
   //Bus Protocol Assertions
   property no_unknown;
     @(posedge clk) !$isunknown(reset_n) && !$isunknown(in_config_valid) && 
-      !$isunknown(in_config_data) && !$isunknown(data_from_dut) &&
-        !$isunknown(in_config_accept);
+      !$isunknown(in_config_data) && !$isunknown(in_config_accept);
   endproperty : no_unknown
   
   assert_all_is_known : assert property(no_unknown) else

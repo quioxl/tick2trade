@@ -31,7 +31,7 @@ class host_driver extends uvm_driver #(host_item);
   
   function void connect_phase(uvm_phase phase);
     if (host_cfg_h == null)
-      `uvm_error(report_id, "Agent did not push config down to Driver")
+      `uvm_fatal(report_id, "Agent did not push config down to Driver")
     else
       host_interface_h = host_cfg_h.host_intf;
   endfunction : connect_phase
