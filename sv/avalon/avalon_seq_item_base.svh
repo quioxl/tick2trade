@@ -5,6 +5,8 @@ class avalon_seq_item_base extends uvm_sequence_item;
   rand bit [7:0] payload [];
   rand int delay_gap;
 
+  bit send_now = 0;
+
   function new(string name = "avalon_message_seq_item");
     super.new(name);
   endfunction
@@ -38,6 +40,7 @@ class avalon_seq_item_base extends uvm_sequence_item;
     super.do_copy(rhs);
     payload = rhs_.payload;
     delay_gap = rhs_.delay_gap;
+    send_now = rhs_.send_now;
   endfunction
 
   virtual function void msg_pack();

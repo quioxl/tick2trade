@@ -5,9 +5,9 @@ class feed_env extends uvm_env;
   feed_env_config cfg_h;
   avalon_agent master_agent_h;
   avalon_agent slave_agent_h;
+  feed_layering layering_h;
 
-  // TEMPORARY
-  uvm_analysis_imp #(avalon_seq_item_base, feed_env) ai;
+  uvm_sequencer#(avalon_seq_item_base) feed_message_seqr_h;
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -24,15 +24,13 @@ class feed_env extends uvm_env;
     master_agent_h.cfg_h = cfg_h.master_cfg_h;
     slave_agent_h = avalon_agent::type_id::create("slave_agent_h",this);
     slave_agent_h.cfg_h = cfg_h.slave_cfg_h;
-    ai = new("ai",this);
+    feed_message_seqr_h = new("feed_message_seqr_h",this);
+    layering_h = feed_layering::type_id::create("layering_h",this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
-    slave_agent_h.ap.connect(ai);
-  endfunction
-
-  function void write(avalon_seq_item_base t);
-    `uvm_info("ENV",$sformatf("Monitor reported packet : %s",t.convert2string),UVM_MEDIUM)
+    layering_h.feed_message_seqr_h = feed_message_seqr_h;
+    layering_h.avalon_seqr_h = master_agent_h.seqr_h;
   endfunction
 
 endclass

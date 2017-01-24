@@ -4,7 +4,7 @@ SEED ?= 0
 
 DEBUG ?= 0
 VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
-VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do wave.do; run 0"
+VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do feed_tb_wave.do; run 0"
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
 
 clean:

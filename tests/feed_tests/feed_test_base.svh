@@ -21,7 +21,7 @@ class feed_test_base extends uvm_test;
 
   virtual function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
-    seqr_h = env_h.master_agent_h.seqr_h;
+    seqr_h = env_h.layering_h.feed_message_seqr_h;
   endfunction
 
   virtual task run_phase(uvm_phase phase);
