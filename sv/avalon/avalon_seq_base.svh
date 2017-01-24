@@ -1,6 +1,8 @@
-class avalon_seq_base extends uvm_sequence #(avalon_message_seq_item_base,avalon_message_seq_item_base);
+class avalon_seq_base extends uvm_sequence #(avalon_seq_item_base,avalon_seq_item_base);
 
     `uvm_object_utils(avalon_seq_base)
+
+    avalon_seq_item_base trans_h;
 
     function new(string name = "avalon_seq_base");
       super.new(name);

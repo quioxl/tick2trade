@@ -2,11 +2,11 @@ class avalon_monitor extends uvm_monitor;
 
   `uvm_component_utils(avalon_monitor)
 
-  uvm_analysis_port #(avalon_message_seq_item_base) ap;
+  uvm_analysis_port #(avalon_seq_item_base) ap;
 
   virtual avalon_if vif;
 
-  avalon_message_seq_item_base trans_h;
+  avalon_seq_item_base trans_h;
 
   avalon_config cfg_h;
 
@@ -31,18 +31,17 @@ class avalon_monitor extends uvm_monitor;
     bit [63:0] p [$];
     bit [7:0] b [$];
     bit [2:0] empty;
-    vif.in_ready <= 1'b1;
-    trans_h = avalon_message_seq_item_base::type_id::create("trans_h");
+    trans_h = avalon_seq_item_base::type_id::create("trans_h");
     forever begin
       @(posedge vif.clk);
-      while (vif.in_valid == 1'b0) @(posedge vif.clk);
-      while (vif.in_endofpacket == 1'b0) begin
-        p.push_back(vif.in_data);
+      while (vif.valid == 1'b0) @(posedge vif.clk);
+      while (vif.endofpacket == 1'b0) begin
+        p.push_back(vif.data);
         @(posedge vif.clk);
-        while (vif.in_valid == 1'b0) @(posedge vif.clk);
+        while (vif.valid == 1'b0) @(posedge vif.clk);
       end
-      p.push_back(vif.in_data);
-      empty = vif.in_empty;
+      p.push_back(vif.data);
+      empty = vif.empty;
       foreach (p[i]) begin
         b.push_back(p[i][63:56]);
         b.push_back(p[i][55:48]);
@@ -55,6 +54,8 @@ class avalon_monitor extends uvm_monitor;
       end
       repeat (empty) void'(b.pop_back());
       trans_h.payload = b;
+      b = {};
+      p = {};
       ap.write(trans_h);
     end
   endtask

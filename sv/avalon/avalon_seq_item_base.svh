@@ -1,26 +1,19 @@
-class avalon_message_seq_item_base extends uvm_sequence_item;
+class avalon_seq_item_base extends uvm_sequence_item;
 
-  `uvm_object_utils(avalon_message_seq_item_base)
+  `uvm_object_utils(avalon_seq_item_base)
 
-  rand bit [23:0] msg_type;
   rand bit [7:0] payload [];
-
-  int message_count = 0;
+  rand int delay_gap;
 
   function new(string name = "avalon_message_seq_item");
     super.new(name);
   endfunction
 
-  constraint length_c { payload.size >=5; payload.size <= 29; }
+  constraint length_c { payload.size <= 1500; payload.size > 0; }
+  constraint delay_gap_c { delay_gap >= 0; delay_gap <= 25; }
 
   virtual function string convert2string();
-    string str;
-    str = {"Size : ",payload.size(),"["};
-    foreach (payload[i]) begin
-      str = $sformatf("%s 0x%2h",str,payload[i]);
-    end
-    str = {str," ]"};
-    return str;
+    return $sformatf("Size : %0d bytes",payload.size());
   endfunction
 
   virtual function void do_print(uvm_printer printer);
@@ -32,32 +25,25 @@ class avalon_message_seq_item_base extends uvm_sequence_item;
   endfunction
 
   virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-    avalon_message_seq_item_base rhs_;
+    avalon_seq_item_base rhs_;
     if (!$cast(rhs_,rhs)) return 0;
     return (super.do_compare(rhs,comparer) && (payload == rhs_.payload));
   endfunction
 
   virtual function void do_copy(uvm_object rhs);
-    avalon_message_seq_item_base rhs_;
+    avalon_seq_item_base rhs_;
     if (!$cast(rhs_,rhs)) begin
       `uvm_fatal("ITEM","Cast failed in do_copy()")
     end
     super.do_copy(rhs);
     payload = rhs_.payload;
+    delay_gap = rhs_.delay_gap;
   endfunction
 
   virtual function void msg_pack();
-    if (payload.size < 3) begin
-      payload = new [3];
-    end
-    payload[0:2] = '{msg_type[23:16],msg_type[15:8],msg_type[7:0]};
   endfunction
 
   virtual function void msg_unpack();
-    if (payload.size < 3) begin
-      `uvm_fatal("ITEM","msg_unpack failed, payload size incorrect")
-    end
-    msg_type = {payload[0],payload[1],payload[2]};
   endfunction
 
 endclass
