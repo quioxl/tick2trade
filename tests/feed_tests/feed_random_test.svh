@@ -10,6 +10,7 @@ class feed_random_test extends feed_test_base;
     super.run_phase(phase);
     seq_h = feed_simple_seq::type_id::create("seq_h");
     seq_h.start(seqr_h);
+    #10us;
     phase.drop_objection(this);
   endtask
 

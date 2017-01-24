@@ -36,14 +36,17 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
         // Then send the current transaction
         down_trans_h = avalon_seq_item_base::type_id::create();
         start_item(down_trans_h);
+        msg_size = up_trans_h.payload.size();
         accum_payload = up_trans_h.payload;
+        accum_payload.push_front(msg_size[7:0]);
+        accum_payload.push_front(msg_size[15:8]);
         message_count = 1;
         build_packet(down_trans_h);
         finish_item(down_trans_h);
       end else begin
         // Otherwise, check to see if what we just got plus what we've accumulated would be too
         // large.  If so, send what we've accumulated
-        if (up_trans_h.payload.size() + 2 + accum_payload.size() >= next_down_size) begin
+        if (up_trans_h.payload.size() + 4 + accum_payload.size() >= next_down_size) begin
           down_trans_h = avalon_seq_item_base::type_id::create();
           start_item(down_trans_h);
           build_packet(down_trans_h);
@@ -58,8 +61,6 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
         end
         // Update the message count at the front of the downstream payload
         message_count++;
-        accum_payload[0] = message_count[15:8];
-        accum_payload[1] = message_count[7:0];
       end
       up_seqr.item_done();
     end
@@ -70,6 +71,8 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
       // We're doing this to randomize delay between packets
       `uvm_fatal("SEQ","Item randomization failed")
     end
+    accum_payload.push_front(message_count[7:0]);
+    accum_payload.push_front(message_count[15:8]);
     target_h.payload = accum_payload;
     message_count = 0;
     accum_payload = {};

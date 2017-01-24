@@ -3,7 +3,8 @@
 *.vstf
 *.log
 *transcript
-work
+*work
+pkg_lib
 *.dbg
 *.ucdb
 *htmlreport
