@@ -5,7 +5,7 @@
 //  Description: Common elements to the Strategy blocks
 //
 // ---------------------------------------------------------------------------
-package strat_pkg;
+package tts_pkg;
 
 
 endpackage
