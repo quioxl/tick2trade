@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 //
-//  Copyright 2014 IMC. All Rights Reserved.
+//  Copyright 2017 IMC. All Rights Reserved.
 //
 //  Description: RAM Control block responsible for arbitrating between Symbol
 //               lookup (RAM Reads) and host configuration (RAM writes)
@@ -66,7 +66,7 @@ module ram_control
       rcb_data <= RAM[ram_addr];
     end
   end
-
+  // FIXME - need to register all inputs from decoder based on PARAM or we will be off a clk
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
   //---------------------------------------------------
