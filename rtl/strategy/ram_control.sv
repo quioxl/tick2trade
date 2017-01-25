@@ -3,7 +3,7 @@
 //  Copyright 2014 IMC. All Rights Reserved.
 //
 //  Description: RAM Control block responsible for arbitrating between Symbol
-//               lookup and host configuration
+//               lookup (RAM Reads) and host configuration (RAM writes)
 //
 // ---------------------------------------------------------------------------
 
@@ -13,45 +13,52 @@ import strat_pkg::*;
 
 module ram_control
 #(
-  parameter RCB_HOST_ARB      = 100,             //
+  parameter RCB_HOST_ARB      = 0,               // Control over write arbitration
   parameter RCB_RAM_WIDTH     = 64,              // Width of the RAM required to hold per symbol parameters
-  parameter RCB_REG_ADDR      = 0                //
+  parameter RCB_REG_ADDR      = 0                // Control of registering the address
 ) (
 
   // Clk/Reset
-  input                            clk,
-  input                            reset_n,
+  input                            clk,          // Core clock
+  input                            reset_n,      // Active low core reset
 
   // Feed Decoder IF
-  input                     [13:0] t2t_rd_addr,  //
-  input                            sef_read,     //
+  input                     [13:0] t2t_rd_addr,  // Address from Feed Decoder
+  input                            sef_read,     // Read strobe
   input                            slf_inmsg,    //
 
-  output reg [(RCB_RAM_WIDTH-1):0] rcb_data,     //
+  output reg [(RCB_RAM_WIDTH-1):0] rcb_data,     // Output data to comparator
 
   // Host Config IF
-  input                     [13:0] hpb_wr_addr,  //
-  input      [(RCB_RAM_WIDTH-1):0] hpb_wr_data,  //
-  input  [log2(RCB_RAM_WIDTH)-1:0] hpb_wr_en,    //
-  input                            hpb_wr_req,   //
-  output                           rcb_wr_done   //
+  input                     [13:0] hpb_wr_addr,  // Address
+  input      [(RCB_RAM_WIDTH-1):0] hpb_wr_data,  // Write data
+  input  [log2(RCB_RAM_WIDTH)-1:0] hpb_wr_en,    // Write enable
+  input                            hpb_wr_req,   // Write Request strobe
+  output                           rcb_wr_done   // Write done flag back to FSM
 
 );
 
-  localparam RAM_DEPTH = 16384;
+  localparam RAM_DEPTH = 16384;        // RAM Depth
+  localparam WR_EN_W   = 8;            // Write Enable granularity
 
   //---------------------------------------------------------------------
   // RAM
   // Expecting inferrence of BRAM.
   //---------------------------------------------------------------------
-  reg [13:0]                ram_addr;
-  reg                       accept_write_req;
-  reg                       ignore_hpb_wr_req;
+  reg [13:0]                ram_addr;                          // RAM Address
+  reg                       accept_write_req;                  // Flag indicating if the Wr Request should be accepted
+  reg                       ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
   reg [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
 
+  //---------------------------------------------------
+  // Only accept write if read isn't requested and
+  // previous write request has been de-asserted
+  //---------------------------------------------------
   assign accept_write_req = !sef_read && hpb_wr_req && !ignore_hpb_wr_req;
 
+  //---------------------------------------------------
   // Register the output data to help with TCKO
+  //---------------------------------------------------
   always_ff @(posedge clk) begin
     if (!reset_n) begin
       rcb_data <= 'h0;
@@ -60,15 +67,33 @@ module ram_control
     end
   end
 
-  //Arbitrate the address.  Default to main stream
-  always_comb begin
-    ram_addr = t2t_rd_addr;
-    if (accept_write_req) begin
-      ram_addr = hpb_wr_addr;
+  //---------------------------------------------------
+  //Arbitrate the address.  Default to Feed Decoder
+  //---------------------------------------------------
+  if (RCB_REG_ADDR == 0) begin : ASSIGN_ADDRESS
+    always_comb begin
+      ram_addr = t2t_rd_addr;
+      if (accept_write_req) begin
+        ram_addr = hpb_wr_addr;
+      end
     end
+  end else if (RCB_REG_ADDR == 1)  begin : REGISTER_ADDRESS
+    always_ff @(posedge clk) begin
+      if (!reset_n) begin
+        ram_addr  <= 1'b0;
+      end else if (accept_write_req) begin
+        ram_addr  <= hpb_wr_addr;
+      end else begin
+        ram_addr  <= t2t_rd_addr;
+      end
+    end
+  end else begin : INVALID_PARAM
+    $error ("Invalid RCB_REG_ADDR Setting");
   end
 
+  //---------------------------------------------------
   //Write Request ignore generation
+  //---------------------------------------------------
   always_ff @(posedge clk) begin
     if (!reset_n) begin
       ignore_hpb_wr_req   <= 1'b0;
@@ -79,18 +104,22 @@ module ram_control
     end
   end
 
+  //---------------------------------------------------
   //Set the write enables
+  //---------------------------------------------------
   generate genvar ii;
-    for (ii=0; ii < RCB_RAM_WIDTH/8; ii = ii+1) begin
+    for (ii=0; ii < RCB_RAM_WIDTH/WR_EN_W; ii = ii+1) begin
       always_ff @(posedge clk) begin
         if (hpb_wr_en[ii]) begin
-          RAM[ram_addr][(ii+1)*8-1:ii*8] <= hpb_wr_data[(ii+1)*8-1:ii*8];
+          RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
         end
       end
     end
   endgenerate
 
-  //Assign the write done  Flop?
+  //---------------------------------------------------
+  // Assign the write done  Flop?
+  //---------------------------------------------------
   assign rcb_wr_done = accept_write_req;
 
 endmodule // ram_control
