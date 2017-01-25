@@ -38,8 +38,8 @@ module ram_control
 
 );
 
-  localparam RAM_DEPTH = 16384;        // RAM Depth
-  localparam WR_EN_W   = 8;            // Write Enable granularity
+  localparam RAM_DEPTH = 16384;                  // RAM Depth
+  localparam WR_EN_W   = 8;                      // Write Enable granularity
 
   //---------------------------------------------------------------------
   // RAM
@@ -66,7 +66,8 @@ module ram_control
       rcb_data <= RAM[ram_addr];
     end
   end
-  // FIXME - need to register all inputs from decoder based on PARAM or we will be off a clk
+
+  // FIXME - need to register all inputs from decoder based on PARAM or we will be off a clk?
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
   //---------------------------------------------------
@@ -110,7 +111,7 @@ module ram_control
   generate genvar ii;
     for (ii=0; ii < RCB_RAM_WIDTH/WR_EN_W; ii = ii+1) begin
       always_ff @(posedge clk) begin
-        if (hpb_wr_en[ii]) begin
+        if (hpb_wr_en[ii] && accept_write_req) begin
           RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
         end
       end
