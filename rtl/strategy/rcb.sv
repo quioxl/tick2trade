@@ -7,9 +7,7 @@
 //
 // ---------------------------------------------------------------------------
 
-`include "strat_pkg.sv"
-
-import strat_pkg::*;
+import tts_pkg::*;
 
 module rcb
 #(
