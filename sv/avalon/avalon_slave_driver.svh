@@ -18,6 +18,7 @@ class avalon_slave_driver extends avalon_driver_base;
     // this in a sequence item, configuration info is used to determine the
     // frequency and duration of stalls out of this driver.
     vif.ready <= 1'b1;
+    vif.error <= 1'b0;
     forever begin
       @(posedge vif.clk);
       if (vif.startofpacket == 1'b1) begin
