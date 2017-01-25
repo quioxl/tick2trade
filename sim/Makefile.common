@@ -25,6 +25,9 @@ build_host:
 build_symbol_map:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/extras/symbol_map_pkg.sv
 
+build_order:
+	vlog $(TICK2TRADE_ROOT_DIR)/sv/order/order_interface.sv $(TICK2TRADE_ROOT_DIR)/sv/order/order_pkg.sv
+
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED)
 
