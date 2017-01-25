@@ -1,6 +1,6 @@
 `include "uvm_macros.svh"
 
-package order_out_pkg;
+package order_pkg;
   import uvm_pkg::*;
 
   `include "order_item.svh";

@@ -23,6 +23,7 @@ class order_agent extends uvm_agent;
     end 
     monitor_h = order_monitor::type_id::create("monitor_h",this);
     monitor_h.cfg_h = cfg_h;
+    ap = new("ap", this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);

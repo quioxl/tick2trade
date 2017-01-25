@@ -3,6 +3,7 @@ class strategy_env_config extends uvm_object;
 
   avalon_config master_cfg_h;
   host_config   host_cfg_h;
+  order_config  order_cfg_h;
 
   bit enable_sb = 1;
   //symbol_mapper mapper_h;
@@ -12,7 +13,7 @@ class strategy_env_config extends uvm_object;
     master_cfg_h = avalon_config::type_id::create("master_cfg_h");
     master_cfg_h.master_slave = AVL_MASTER;
     host_cfg_h   = host_config::type_id::create("host_cfg_h");
-    //mapper_h     = symbol_mapper::type_id::create("mapper_h");
+    order_cfg_h  = order_config::type_id::create("host_cfg_h");
   endfunction
 
   task wait_for_reset();

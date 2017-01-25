@@ -7,7 +7,7 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
   //strategy_message_item strategy_trans_h;
   uvm_analysis_imp_host #(host_item, strategy_predictor) host_export;
-  uvm_analysis_port #(avalon_seq_item_base) ap;  //CHECK_ME: Needs to be updated to order type
+  uvm_analysis_port #(order_item) ap;
 
   //Structures for holding information programed into the host interface ram
   host_order_t temp_order;

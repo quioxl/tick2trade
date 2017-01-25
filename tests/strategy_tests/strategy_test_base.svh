@@ -13,10 +13,12 @@ class strategy_test_base extends uvm_test;
     cfg_h = strategy_env_config::type_id::create("cfg_h");
     env_h = strategy_env::type_id::create("env_h",this);
     env_h.cfg_h = cfg_h;
-    if (!uvm_config_db #(virtual avalon_if)::get(this,"","avl_master_if",cfg_h.master_cfg_h.vif))
-      `uvm_fatal("TEST","Unable to find avl_master_if entry in config db")
+    if (!uvm_config_db #(virtual avalon_if)::get(this,"","feed_if",cfg_h.master_cfg_h.vif))
+      `uvm_fatal("TEST","Unable to find feed_if entry in config db")
     if (!uvm_config_db #(virtual host_interface)::get(this,"","host_if",cfg_h.host_cfg_h.host_intf))
       `uvm_fatal("TEST","Unable to find host_if entry in config db")
+    if (!uvm_config_db #(virtual order_interface)::get(this,"","order_if",cfg_h.order_cfg_h.vif))
+      `uvm_fatal("TEST","Unable to find order_if entry in config db")
   endfunction
 
 /* -----\/----- EXCLUDED -----\/-----
