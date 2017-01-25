@@ -5,7 +5,7 @@
 //  Description: Avalon Interface
 //
 // ---------------------------------------------------------------------------
-interface avalon_if;
+interface avalon_if();
   logic        clk;
   logic        reset_n;
   logic        ready;
@@ -15,4 +15,4 @@ interface avalon_if;
   logic [63:0] data;
   logic  [2:0] empty;
   logic        error;
-endinterface
+endinterface : avalon_if
