@@ -1,7 +1,5 @@
 // ---------------------------------------------------------------------------
 //
-//  Copyright 2017 IMC. All Rights Reserved.
-//
 //  Description: RAM Control block responsible for arbitrating between Symbol
 //               lookup (RAM Reads) and host configuration (RAM writes)
 //
@@ -43,10 +41,11 @@ module rcb
   // RAM
   // Expecting inferrence of BRAM.
   //---------------------------------------------------------------------
-  reg [13:0]                ram_addr;                          // RAM Address
-  reg                       accept_write_req;                  // Flag indicating if the Wr Request should be accepted
-  reg                       ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
-  reg [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
+  reg  [log2(RCB_RAM_WIDTH)-1:0] hpb_wr_en_q;
+  reg                     [13:0] ram_addr;                          // RAM Address
+  reg                            accept_write_req;                  // Flag indicating if the Wr Request should be accepted
+  reg                            ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
+  reg      [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
 
   //---------------------------------------------------
   // Only accept write if read isn't requested and
@@ -66,6 +65,26 @@ module rcb
   end
 
   // FIXME - need to register all inputs from decoder based on PARAM or we will be off a clk?
+
+  //---------------------------------------------------
+  //Arbitrate the address.  Default to Feed Decoder
+  //---------------------------------------------------
+  if (RCB_REG_ADDR == 0) begin : ASSIGN_WE
+    always_comb begin
+      hpb_wr_en_q = hpb_wr_en;
+    end
+  end else if (RCB_REG_ADDR == 1)  begin : REGISTER_WE
+    always_ff @(posedge clk) begin
+      if (!reset_n) begin
+        hpb_wr_en_q  <= 'h0;
+      end else  begin
+        hpb_wr_en_q  <= hpb_wr_en;
+      end
+    end
+  end else begin : WE_INVALID_PARAM
+    $error ("Invalid RCB_REG_ADDR Setting");
+  end
+
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
   //---------------------------------------------------
@@ -86,7 +105,7 @@ module rcb
         ram_addr  <= t2t_rd_addr;
       end
     end
-  end else begin : INVALID_PARAM
+  end else begin : ADDR_INVALID_PARAM
     $error ("Invalid RCB_REG_ADDR Setting");
   end
 
@@ -109,7 +128,7 @@ module rcb
   generate genvar ii;
     for (ii=0; ii < RCB_RAM_WIDTH/WR_EN_W; ii = ii+1) begin
       always_ff @(posedge clk) begin
-        if (hpb_wr_en[ii] && accept_write_req) begin
+        if (hpb_wr_en_q[ii] && accept_write_req) begin
           RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
         end
       end

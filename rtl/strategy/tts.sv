@@ -1,7 +1,5 @@
 // ---------------------------------------------------------------------------
 //
-//  Copyright 2017 IMC. All Rights Reserved.
-//
 //  Description: Strategy module wrapper containing RCB, Comparator, and FSM
 //               modules
 //
