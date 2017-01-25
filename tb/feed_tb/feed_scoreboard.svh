@@ -82,7 +82,7 @@ class feed_scoreboard extends uvm_component;
         disable TIMEOUT_BLOCK;
       end
       begin : TIMEOUT_BLOCK
-        #500us;
+        #10us;
         `uvm_error("SB","Timed out waiting for scoreboard queues to empty")
         expect_q = {};
         actual_q = {};

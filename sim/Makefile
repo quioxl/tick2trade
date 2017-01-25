@@ -18,7 +18,7 @@ build_dut:
 
 build_feed_tb: build_avalon build_dut
 	vlog -work pkg_lib ../tb/feed_tb/feed_env_pkg.sv ../tests/feed_tests/feed_test_pkg.sv 
-	vlog -L pkg_lib -work feed_tb_work ../tb/feed_tb/tb.sv
+	vlog -L pkg_lib -work feed_tb_work ../tb/feed_tb/tb.sv ../tb/feed_tb/feed_recorder.sv
 	vopt tb -L feed_tb_work -L pkg_lib -L dut_lib -work feed_tb_work -o tb_opt
 	vopt tb -L feed_tb_work -L pkg_lib -L dut_lib -work feed_tb_work -o tb_dbg +acc
 

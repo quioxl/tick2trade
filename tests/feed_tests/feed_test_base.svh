@@ -28,6 +28,7 @@ class feed_test_base extends uvm_test;
     super.run_phase(phase);
     phase.raise_objection(this);
     cfg_h.wait_for_reset();
+    cfg_h.wait_for_clocks(10);
   endtask
 
 endclass
