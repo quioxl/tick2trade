@@ -5,7 +5,7 @@
 //
 // ---------------------------------------------------------------------------
 
-import tts_pkg::*;
+//import tts_pkg::*;
 
 module rcb
 #(
@@ -28,9 +28,9 @@ module rcb
   // Host Config IF
   input                     [13:0] hpb_wr_addr,  // Address
   input      [(RCB_RAM_WIDTH-1):0] hpb_wr_data,  // Write data
-  input  [log2(RCB_RAM_WIDTH)-1:0] hpb_wr_en,    // Write enable
+  input      [RCB_RAM_WIDTH/8-1:0] hpb_wr_en,    // Write enable
   input                            hpb_wr_req,   // Write Request strobe
-  output                           rcb_wr_done   // Write done flag back to FSM
+  output reg                       rcb_wr_done   // Write done flag back to FSM
 
 );
 
@@ -41,17 +41,36 @@ module rcb
   // RAM
   // Expecting inferrence of BRAM.
   //---------------------------------------------------------------------
-  reg  [log2(RCB_RAM_WIDTH)-1:0] hpb_wr_en_q;
-  reg                     [13:0] ram_addr;                          // RAM Address
-  reg                            accept_write_req;                  // Flag indicating if the Wr Request should be accepted
-  reg                            ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
-  reg      [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
+  reg        [RCB_RAM_WIDTH/8-1:0] hpb_wr_en_q;
+  reg                       [13:0] ram_addr;                          // RAM Address
+  reg                              accept_write_req;                  // Flag indicating if the Wr Request should be accepted
+  reg                              accept_write_req_q;                // Flag indicating if the Wr Request should be accepted
+  reg                              ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
+  reg        [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
 
   //---------------------------------------------------
   // Only accept write if read isn't requested and
   // previous write request has been de-asserted
   //---------------------------------------------------
   assign accept_write_req = !sef_read && hpb_wr_req && !ignore_hpb_wr_req;
+
+  if (RCB_REG_ADDR == 0) begin
+    always_comb begin
+      accept_write_req_q = accept_write_req;
+    end
+  end else if (RCB_REG_ADDR == 1)  begin
+    always_ff @(posedge clk) begin
+      if (!reset_n) begin
+        accept_write_req_q  <= 'h0;
+      end else  begin
+        accept_write_req_q  <= accept_write_req;
+      end
+    end
+  end else begin
+    $error ("Invalid RCB_REG_ADDR Setting");
+  end
+
+//  assign accept_write_req = !sef_read && hpb_wr_req && !ignore_hpb_wr_req;
 
   //---------------------------------------------------
   // Register the output data to help with TCKO
@@ -69,33 +88,25 @@ module rcb
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
   //---------------------------------------------------
-  if (RCB_REG_ADDR == 0) begin : ASSIGN_WE
-    always_comb begin
-      hpb_wr_en_q = hpb_wr_en;
+  always_ff @(posedge clk) begin
+    if (!reset_n) begin
+      hpb_wr_en_q  <= 'h0;
+    end else  begin
+      hpb_wr_en_q  <= hpb_wr_en;
     end
-  end else if (RCB_REG_ADDR == 1)  begin : REGISTER_WE
-    always_ff @(posedge clk) begin
-      if (!reset_n) begin
-        hpb_wr_en_q  <= 'h0;
-      end else  begin
-        hpb_wr_en_q  <= hpb_wr_en;
-      end
-    end
-  end else begin : WE_INVALID_PARAM
-    $error ("Invalid RCB_REG_ADDR Setting");
   end
 
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
   //---------------------------------------------------
-  if (RCB_REG_ADDR == 0) begin : ASSIGN_ADDRESS
+  if (RCB_REG_ADDR == 0) begin
     always_comb begin
       ram_addr = t2t_rd_addr;
       if (accept_write_req) begin
         ram_addr = hpb_wr_addr;
       end
     end
-  end else if (RCB_REG_ADDR == 1)  begin : REGISTER_ADDRESS
+  end else if (RCB_REG_ADDR == 1)  begin
     always_ff @(posedge clk) begin
       if (!reset_n) begin
         ram_addr  <= 1'b0;
@@ -105,7 +116,7 @@ module rcb
         ram_addr  <= t2t_rd_addr;
       end
     end
-  end else begin : ADDR_INVALID_PARAM
+  end else begin
     $error ("Invalid RCB_REG_ADDR Setting");
   end
 
@@ -117,7 +128,7 @@ module rcb
       ignore_hpb_wr_req   <= 1'b0;
     end else if (accept_write_req) begin
       ignore_hpb_wr_req   <= 1'b1;
-    end else if (ignore_hpb_wr_req && !hpb_wr_reg) begin
+    end else if (!hpb_wr_req) begin
       ignore_hpb_wr_req   <= 1'b0;       // WR Req de-asserted.  De-assert ignore
     end
   end
@@ -127,9 +138,18 @@ module rcb
   //---------------------------------------------------
   generate genvar ii;
     for (ii=0; ii < RCB_RAM_WIDTH/WR_EN_W; ii = ii+1) begin
-      always_ff @(posedge clk) begin
-        if (hpb_wr_en_q[ii] && accept_write_req) begin
-          RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
+
+      if (RCB_REG_ADDR == 0) begin
+        always_ff @(posedge clk) begin
+          if (hpb_wr_en[ii] && accept_write_req) begin
+            RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
+          end
+        end
+      end else if (RCB_REG_ADDR == 1)  begin
+        always_ff @(posedge clk) begin
+          if (hpb_wr_en_q[ii] && accept_write_req_q) begin
+            RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
+          end
         end
       end
     end
@@ -138,6 +158,12 @@ module rcb
   //---------------------------------------------------
   // Assign the write done  Flop?
   //---------------------------------------------------
-  assign rcb_wr_done = accept_write_req;
+  always_ff @(posedge clk) begin
+    if (!reset_n) begin
+      rcb_wr_done <= 1'b0;
+    end else  begin
+      rcb_wr_done <= accept_write_req;
+    end
+  end
 
 endmodule // rcb
