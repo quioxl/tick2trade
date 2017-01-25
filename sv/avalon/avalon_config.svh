@@ -21,4 +21,8 @@ class avalon_config extends uvm_object;
     return cfg_h;
   endfunction
 
+  task wait_for_reset();
+    wait(vif.reset_n == 1'b1);
+  endtask
+
 endclass

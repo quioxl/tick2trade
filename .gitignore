@@ -5,6 +5,7 @@
 *transcript
 *work
 pkg_lib
+dut_lib
 *.dbg
 *.ucdb
 *htmlreport

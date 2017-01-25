@@ -32,6 +32,7 @@ class avalon_monitor extends uvm_monitor;
     bit [7:0] b [$];
     bit [2:0] empty;
     trans_h = avalon_seq_item_base::type_id::create("trans_h");
+    cfg_h.wait_for_reset();
     forever begin
       @(posedge vif.clk);
       while (vif.valid == 1'b0) @(posedge vif.clk);
