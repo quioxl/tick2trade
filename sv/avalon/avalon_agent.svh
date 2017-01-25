@@ -6,6 +6,7 @@ class avalon_agent extends uvm_agent;
   avalon_driver_base driver_h;
   avalon_monitor monitor_h;
   uvm_sequencer #(avalon_seq_item_base) seqr_h;
+  
   uvm_analysis_port #(avalon_seq_item_base) ap;
 
   function new(string name, uvm_component parent);

@@ -1,6 +1,6 @@
-class feed_simple_seq extends uvm_sequence #(avalon_seq_item_base);
+class feed_random_seq extends uvm_sequence #(avalon_seq_item_base);
 
-  `uvm_object_utils(feed_simple_seq)
+  `uvm_object_utils(feed_random_seq)
 
   int trans_count = 1000;
 
@@ -18,7 +18,7 @@ class feed_simple_seq extends uvm_sequence #(avalon_seq_item_base);
       if (!feed_trans_h.randomize()) begin
         `uvm_fatal("SEQ","Transaction randomization failed")
       end
-      `uvm_info("SEQ",$sformatf("Sending feed message: %s",trans_h.convert2string()),UVM_MEDIUM)
+      `uvm_info("SEQ",$sformatf("Sending feed message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
       feed_trans_h.msg_pack();
       avalon_trans_h.copy(feed_trans_h);
       finish_item(avalon_trans_h);
