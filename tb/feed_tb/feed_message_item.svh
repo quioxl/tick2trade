@@ -69,7 +69,7 @@ class feed_message_item extends avalon_seq_item_base;
 
   virtual function void msg_unpack();
     if (payload.size() != 17) begin
-      `uvm_fatal("ITEM","Size of payload incorrect for unpack")
+      `uvm_fatal("ITEM",$sformatf("Size of payload (%0d bytes) incorrect for unpack",payload.size()))
     end
     msg_type = { payload[0], payload[1], payload[2]};
     symbol_id = { payload[3], payload[4] };

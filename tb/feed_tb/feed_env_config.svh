@@ -4,6 +4,8 @@ class feed_env_config extends uvm_object;
   avalon_config master_cfg_h;
   avalon_config slave_cfg_h;
 
+  bit enable_sb = 1;
+
   function new(string name="feed_env_config");
     super.new(name);
     master_cfg_h = avalon_config::type_id::create("master_cfg_h");

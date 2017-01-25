@@ -7,6 +7,8 @@ class feed_env extends uvm_env;
   avalon_agent slave_agent_h;
   feed_layering layering_h;
   feed_monitor monitor_h;
+  feed_predictor predictor_h;
+  feed_scoreboard scoreboard_h;
 
   uvm_analysis_port #(avalon_seq_item_base) feed_ap;
 
@@ -30,14 +32,20 @@ class feed_env extends uvm_env;
     feed_message_seqr_h = new("feed_message_seqr_h",this);
     layering_h = feed_layering::type_id::create("layering_h",this);
     monitor_h = feed_monitor::type_id::create("monitor_h",this);
+    predictor_h = feed_predictor::type_id::create("predictor_h",this);
+    scoreboard_h = feed_scoreboard::type_id::create("scoreboard_h",this);
     feed_ap = new("feed_ap",this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
+    scoreboard_h.cfg_h = cfg_h;
     layering_h.feed_message_seqr_h = feed_message_seqr_h;
     layering_h.avalon_seqr_h = master_agent_h.seqr_h;
     feed_ap.connect(monitor_h.ap);
     master_agent_h.monitor_h.ap.connect(monitor_h.analysis_export);
+    monitor_h.ap.connect(predictor_h.analysis_export);
+    predictor_h.ap.connect(scoreboard_h.expect_ai);
+    slave_agent_h.ap.connect(scoreboard_h.actual_ai);
   endfunction
 
 endclass
