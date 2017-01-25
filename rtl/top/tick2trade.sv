@@ -77,5 +77,24 @@ module tick2trade (
   //--------------------------------------------------
   // Strategy
   //--------------------------------------------------
+  tts tts_i (
+
+    // Clock/Reset
+    .clk              (),
+    .reset_n          (),
+
+    .t2t_rd_addr      (),
+    .sef_read         (),
+    .slf_inmsg        (),
+
+    .rcb_data         (),
+
+    .hpb_wr_addr      (),
+    .hpb_wr_data      (),
+    .hpb_wr_en        (),
+    .hpb_wr_req       (),
+    .rcb_wr_done      ()
+
+  );
 
 endmodule

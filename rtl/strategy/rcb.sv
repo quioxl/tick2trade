@@ -13,7 +13,7 @@ module rcb
 #(
   parameter RCB_HOST_ARB      = 0,               // Control over write arbitration
   parameter RCB_RAM_WIDTH     = 64,              // Width of the RAM required to hold per symbol parameters
-  parameter RCB_REG_ADDR      = 0                // Control of registering the address
+  parameter RCB_REG_ADDR      = 0                // Control registering the address
 ) (
 
   // Clk/Reset
