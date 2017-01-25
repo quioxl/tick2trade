@@ -1,0 +1,22 @@
+export TICK2TRADE_ROOT_DIR ?= ../..
+TESTNAME ?= sanity_test
+SEED ?= 0
+DEBUG ?= 0
+WAVEFILE ?= wave.do
+
+VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
+VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do $(WAVEFILE); run 0"
+VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
+
+clean:
+	rm -rf *.log *~ *.bak work transcript *.wlf design.bin qwave.db dut_lib pkg_lib feed_tb_work certe_dump.xml *.vstf *.vcd *_record.txt
+
+build_dut:
+	vlog -f $(TICK2TRADE_ROOT_DIR)/rtl/design.f
+
+build_avalon: 
+	vlog $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
+
+run: 
+	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED)
+
