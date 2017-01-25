@@ -18,6 +18,10 @@ class feed_env_config extends uvm_object;
     wait(master_cfg_h.vif.reset_n == 1'b1);
   endtask
 
+  task wait_for_clocks(int count);
+    repeat (count) @(posedge master_cfg_h.vif.clk);
+  endtask
+
   static function feed_env_config get_config (uvm_component comp, string name = "feed_env_config");
     feed_env_config cfg_h;
     if (!uvm_config_db#(feed_env_config)::get(comp,"",name,cfg_h)) begin

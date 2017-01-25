@@ -52,6 +52,8 @@ module tb;
     .out_error          ( avl_slave_if.error          )
   );
 
+  feed_recorder U_recorder (.master_if(avl_master_if));
+
   initial begin
     uvm_config_db#(virtual avalon_if)::set(null,"*","master_if",avl_master_if);
     uvm_config_db#(virtual avalon_if)::set(null,"*","slave_if",avl_slave_if);
