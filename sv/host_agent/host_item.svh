@@ -8,7 +8,7 @@ class host_item extends uvm_sequence_item;
 
   const string report_id = "HOST_ITEM";
 
-  //Probably use union to view the data in different ways
+  //256-bit data to be sent over host interface
   rand bit [255:0] data;
 
   function new(string name = "host_item");

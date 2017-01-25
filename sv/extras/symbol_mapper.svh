@@ -2,6 +2,9 @@ class symbol_mapper extends uvm_object;
 
   `uvm_object_utils(symbol_mapper)
 
+  //This is going to be a singleton class
+  static symbol_mapper single_mapper;
+
   //16-bit symbols are mapped to 14-bit addresses with a 1-bit valid.
   // The valid and 14-bit address are stored in this format:
   //  16'h{valid, 1'b0, 14'b{map_addr}}
@@ -15,6 +18,12 @@ class symbol_mapper extends uvm_object;
     super.new(name);
   endfunction : new
 
+  static function symbol_mapper get_mapper();
+    if (single_mapper == null) 
+      single_mapper = symbol_mapper::type_id::create("single_mapper");
+    return single_mapper;
+  endfunction : get_mapper;
+
   function map_addr_t get_next_map_addr();
     if (addr_recycle.size() != 0)
       return addr_recycle.pop_front();
@@ -22,6 +31,7 @@ class symbol_mapper extends uvm_object;
       //Possibly want to enable randomization of count
       return addr_counter++; //CHECK_THIS
   endfunction : get_next_map_addr
+
 
   function map_mem_t enable_symbol(symbol_t symbol);
     if (map_addrs.exists(symbol) && map_addrs[symbol].valid == 1) begin
