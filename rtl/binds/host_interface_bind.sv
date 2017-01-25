@@ -41,3 +41,6 @@ module host_interface_bind (
   end
 
 endmodule
+
+// Bind it
+bind host_interface host_interface_bind host_interface_bound (.*);

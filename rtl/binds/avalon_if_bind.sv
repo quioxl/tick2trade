@@ -68,3 +68,6 @@ module avalon_if_bind (
   end
 
 endmodule
+
+// Bind it
+bind avalon_if avalon_if_bind  avalon_if_bound (.*);
