@@ -10,7 +10,7 @@ interface hpb_if #( parameter RCB_RAM_WIDTH = 64);
 
   logic                              hpb_wr_addr;
   logic       [(RCB_RAM_WIDTH-1):0]  hpb_wr_data;
-  logic   [log2(RCB_RAM_WIDTH)-1:0]  hpb_wr_en;
+  logic       [RCB_RAM_WIDTH/8-1:0]  hpb_wr_en;
   logic                              hpb_wr_req;
   logic                              rcb_wr_done;
 
