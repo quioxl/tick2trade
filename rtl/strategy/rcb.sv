@@ -11,7 +11,7 @@
 
 import strat_pkg::*;
 
-module ram_control
+module rcb
 #(
   parameter RCB_HOST_ARB      = 0,               // Control over write arbitration
   parameter RCB_RAM_WIDTH     = 64,              // Width of the RAM required to hold per symbol parameters
@@ -123,4 +123,4 @@ module ram_control
   //---------------------------------------------------
   assign rcb_wr_done = accept_write_req;
 
-endmodule // ram_control
+endmodule // rcb
