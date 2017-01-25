@@ -42,12 +42,18 @@ module rcb
   // Expecting inferrence of BRAM.
   //---------------------------------------------------------------------
   reg        [RCB_RAM_WIDTH/8-1:0] hpb_wr_en_q;
-  reg                       [13:0] ram_addr;                          // RAM Address
+  reg                       [13:0] ram_addr_q;                        // RAM Address
   reg                              accept_write_req;                  // Flag indicating if the Wr Request should be accepted
   reg                              accept_write_req_q;                // Flag indicating if the Wr Request should be accepted
-  reg                              ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
-  reg        [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
-  reg                              block_write;                       //
+  reg                              ignore_hpb_wr_req_q;               // Flag indicating if Wr Req input should be ignored
+  reg                              block_write;                       // Flag indicating if a write should be blocked
+
+  //---------------------------------------------------------------------
+  // Storage RAM - Vivado should infer single port BRAM
+  //   Width - RCB_RAM_WIDTH
+  //   Depth - RAM_DEPTH (hardcoded to 16K)
+  //---------------------------------------------------------------------
+  reg        [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];
 
   //---------------------------------------------------
   // Only accept write if read isn't requested and
@@ -64,7 +70,7 @@ module rcb
   end
 
   // Flag indicating if a write request is accepted
-  assign accept_write_req = !block_write && hpb_wr_req && !ignore_hpb_wr_req;
+  assign accept_write_req = !block_write && hpb_wr_req && !ignore_hpb_wr_req_q;
 
   if (RCB_REG_ADDR == 0) begin
     always_comb begin
@@ -89,12 +95,13 @@ module rcb
     if (!reset_n) begin
       rcb_data <= 'h0;
     end else begin
-      rcb_data <= RAM[ram_addr];
+      rcb_data <= RAM[ram_addr_q];
     end
   end
 
   //---------------------------------------------------
-  //Arbitrate the address.  Default to Feed Decoder
+  //Register of the write enable to account for when
+  //address is registered
   //---------------------------------------------------
   always_ff @(posedge clk) begin
     if (!reset_n) begin
@@ -109,19 +116,19 @@ module rcb
   //---------------------------------------------------
   if (RCB_REG_ADDR == 0) begin
     always_comb begin
-      ram_addr = t2t_rd_addr;
+      ram_addr_q = t2t_rd_addr;
       if (accept_write_req) begin
-        ram_addr = hpb_wr_addr;
+        ram_addr_q = hpb_wr_addr;
       end
     end
   end else if (RCB_REG_ADDR == 1)  begin
     always_ff @(posedge clk) begin
       if (!reset_n) begin
-        ram_addr  <= 1'b0;
+        ram_addr_q  <= 1'b0;
       end else if (accept_write_req) begin
-        ram_addr  <= hpb_wr_addr;
+        ram_addr_q  <= hpb_wr_addr;
       end else begin
-        ram_addr  <= t2t_rd_addr;
+        ram_addr_q  <= t2t_rd_addr;
       end
     end
   end else begin
@@ -130,19 +137,23 @@ module rcb
 
   //---------------------------------------------------
   //Write Request ignore generation
+  // Ignore when WR Request was processed but source
+  // block has not dropped request on subsequent clk.
+  // Sticky until wr_req input drops
   //---------------------------------------------------
   always_ff @(posedge clk) begin
     if (!reset_n) begin
-      ignore_hpb_wr_req   <= 1'b0;
+      ignore_hpb_wr_req_q   <= 1'b0;
     end else if (accept_write_req) begin
-      ignore_hpb_wr_req   <= 1'b1;
+      ignore_hpb_wr_req_q   <= 1'b1;
     end else if (!hpb_wr_req) begin
-      ignore_hpb_wr_req   <= 1'b0;
+      ignore_hpb_wr_req_q   <= 1'b0;
     end
   end
 
   //---------------------------------------------------
   //Set the write enables
+  // Generation of Byte enables.
   //---------------------------------------------------
   generate genvar ii;
     for (ii=0; ii < RCB_RAM_WIDTH/WR_EN_W; ii = ii+1) begin
@@ -150,13 +161,13 @@ module rcb
       if (RCB_REG_ADDR == 0) begin
         always_ff @(posedge clk) begin
           if (hpb_wr_en[ii] && accept_write_req) begin
-            RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
+            RAM[ram_addr_q][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
           end
         end
       end else if (RCB_REG_ADDR == 1)  begin
         always_ff @(posedge clk) begin
           if (hpb_wr_en_q[ii] && accept_write_req_q) begin
-            RAM[ram_addr][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
+            RAM[ram_addr_q][(ii+1)*WR_EN_W-1:ii*WR_EN_W] <= hpb_wr_data[(ii+1)*WR_EN_W-1:ii*WR_EN_W];
           end
         end
       end
