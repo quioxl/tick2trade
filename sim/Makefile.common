@@ -15,7 +15,15 @@ build_dut:
 	vlog -f $(TICK2TRADE_ROOT_DIR)/rtl/design.f
 
 build_avalon: 
-	vlog $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
+	vlog $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
+	  $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
+
+build_host:
+	vlog $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_interface.sv \
+	  $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_agent_pkg.sv
+
+build_symbol_map:
+	vlog $(TICK2TRADE_ROOT_DIR)/sv/extras/symbol_map_pkg.sv
 
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED)

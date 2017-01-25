@@ -15,13 +15,12 @@ class host_monitor extends uvm_monitor;
   //Variables
   const string report_id = "HOST_MONITOR";
   host_item                         transaction_h;
-  host_config                       host_cfg_h;  //Config object handle
+  host_config                       cfg_h;  //Config object handle
 
 
   function new(string name, uvm_component p);
-    string message;
     super.new(name, p);
-    `uvm_info(report_id, $sformatf("just built a processor monitor called %s", name), UVM_LOW)
+    //`uvm_info(report_id, $sformatf("just built a host monitor called %s", name), UVM_LOW)
   endfunction : new
 
   function void build_phase(uvm_phase phase);
@@ -32,16 +31,16 @@ class host_monitor extends uvm_monitor;
   endfunction : build_phase
   
   function void connect_phase(uvm_phase phase);
-    if (host_cfg_h == null)
+    if (cfg_h == null)
       `uvm_fatal(report_id, "Agent did not push config down to Driver")
     else
-      host_interface_h = host_cfg_h.host_intf;
+      host_interface_h = cfg_h.host_intf;
   endfunction : connect_phase
 
 
   task run_phase(uvm_phase phase);
     // wait for reset to deassert...
-    @(negedge host_interface_h.reset);
+    @(posedge host_interface_h.reset_n);
     //Go into a loop to capture the transactions and then send them out of an
     // analysis port
     forever @(posedge host_interface_h.in_config_valid) begin

@@ -9,12 +9,12 @@ class host_agent extends uvm_agent;
 
   const string report_id = "HOST_AGENT";
 
-  host_driver                           m_driver;
-  uvm_sequencer #(host_item, host_item) m_sequencer;
-  host_monitor                          m_monitor;
-  uvm_analysis_port #(host_item)        m_mon_out_ap;
+  host_driver                           driver_h;
+  uvm_sequencer #(host_item, host_item) sequencer_h;
+  host_monitor                          monitor_h;
+  uvm_analysis_port #(host_item)        mon_out_ap;
 
-  host_config                           m_host_cfg;  //Config object handle
+  host_config                           cfg_h;  //Config object handle
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -22,41 +22,42 @@ class host_agent extends uvm_agent;
 
   function void build_phase(uvm_phase phase);
     //super.build_phase(phase);  //Don't call - Large Performance Impact
-    //Get the config object
-    if (!uvm_config_db #(host_config)::get(this, "", 
-                               "host_config", m_host_cfg))
-      `uvm_fatal(report_id, "Cannot get() configuration host_config from uvm_config_db. Have you set() it?")
+    if (cfg_h == null) 
+      //Get the config object
+      if (!uvm_config_db #(host_config)::get(this, "", 
+                                             "host_config", cfg_h))
+        `uvm_fatal(report_id, "Cannot get() configuration host_config from uvm_config_db. Have you set() it?")
 
     //Build the driver and controller
-    if (m_host_cfg.active) begin
+    if (cfg_h.active) begin
       //`uvm_info(report_id, "Getting Driver from Factory", UVM_LOW )
-      m_driver   = host_driver::type_id::create("m_driver", this);
+      driver_h   = host_driver::type_id::create("driver_h", this);
+      //Push the config down into the driver
+      driver_h.cfg_h = cfg_h;
       //`uvm_info(report_id, "Newing host sequencer", UVM_LOW )
-      m_sequencer = new("m_sequencer", this);
+      sequencer_h = new("sequencer_h", this);
       //Place the sequencer into the resource database for sequences to use
       //uvm_config_db #(uvm_sequencer #(host_item, host_item))::set(null,"*","host_sequencer",m_sequencer);
     end
 
     //`uvm_info(report_id, "Getting Monitor from the Factory", UVM_LOW )
-    m_monitor  = host_monitor::type_id::create("m_monitor", this);
+    monitor_h  = host_monitor::type_id::create("monitor_h", this);
+    //Push the config down into the monitor
+    monitor_h.cfg_h = cfg_h;
     // new the analysis port
-    m_mon_out_ap = new("m_mon_out_ap", this);
+    mon_out_ap = new("mon_out_ap", this);
 
   endfunction : build_phase
 
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     // connect up the uvm ports
-    if (m_host_cfg.active) begin
-      //Push the config down into the driver
-      m_driver.host_cfg_h = m_host_cfg;
+    if (cfg_h.active) begin
       //Connect the driver's port
-      m_driver.seq_item_port.connect(m_sequencer.seq_item_export);
+      driver_h.seq_item_port.connect(sequencer_h.seq_item_export);
     end
-    //Push the config down into the monitor
-    m_monitor.host_cfg_h = m_host_cfg;
     // connect the analysis port in the monitor to the agent port
-    m_monitor.result_from_monitor_ap.connect(m_mon_out_ap);
+    monitor_h.result_from_monitor_ap.connect(mon_out_ap);
   endfunction : connect_phase
 
 endclass : host_agent

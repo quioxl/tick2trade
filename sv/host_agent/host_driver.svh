@@ -15,7 +15,7 @@ class host_driver extends uvm_driver #(host_item);
   bit                       done = 1;
 
   //Config object handle
-  host_config                host_cfg_h;
+  host_config                cfg_h;
   
   // virtual interface
   virtual host_interface     host_interface_h;
@@ -30,10 +30,10 @@ class host_driver extends uvm_driver #(host_item);
   endfunction : build_phase
   
   function void connect_phase(uvm_phase phase);
-    if (host_cfg_h == null)
+    if (cfg_h == null)
       `uvm_fatal(report_id, "Agent did not push config down to Driver")
     else
-      host_interface_h = host_cfg_h.host_intf;
+      host_interface_h = cfg_h.host_intf;
   endfunction : connect_phase
   
   task run_phase(uvm_phase phase);
