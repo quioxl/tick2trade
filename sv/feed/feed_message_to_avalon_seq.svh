@@ -8,7 +8,9 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
   bit [7:0] accum_payload [$];
   bit [15:0] message_count;
 
-  constraint down_size_c { next_down_size >= 8; next_down_size <= 1500; }
+  // Max constraint does not take into account the message size bytes (2) 
+  // which are added afterwards.
+  constraint down_size_c { next_down_size >= 8; next_down_size <= 1498; }
 
   function new(string name = "feed_message_to_avalon_seq");
     super.new(name);

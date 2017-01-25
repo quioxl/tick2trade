@@ -1,7 +1,7 @@
 class order_config extends uvm_object;
   `uvm_object_utils(order_config)
 
-  int stall_frequency = 1;
+  int stall_frequency = 25;
   int max_stall_width = 10;
   int min_stall_width = 1;
 
