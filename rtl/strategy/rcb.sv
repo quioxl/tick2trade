@@ -47,12 +47,24 @@ module rcb
   reg                              accept_write_req_q;                // Flag indicating if the Wr Request should be accepted
   reg                              ignore_hpb_wr_req;                 // Register indicating if Wr Req input should be ignored
   reg        [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];                // BRAM RAM to store Symbol information
+  reg                              block_write;                       //
 
   //---------------------------------------------------
   // Only accept write if read isn't requested and
   // previous write request has been de-asserted
   //---------------------------------------------------
-  assign accept_write_req = !sef_read && hpb_wr_req && !ignore_hpb_wr_req;
+  always_comb begin
+    if (RCB_HOST_ARB == 1) begin
+      block_write = slf_inmsg;
+    end else if (RCB_HOST_ARB == 0) begin
+      block_write = sef_read;
+    end else begin
+      $error ("Invalid RCB_HOST_ARB Setting: %0d", RCB_HOST_ARB);
+    end
+  end
+
+  // Flag indicating if a write request is accepted
+  assign accept_write_req = !block_write && hpb_wr_req && !ignore_hpb_wr_req;
 
   if (RCB_REG_ADDR == 0) begin
     always_comb begin
@@ -67,10 +79,8 @@ module rcb
       end
     end
   end else begin
-    $error ("Invalid RCB_REG_ADDR Setting");
+    $error ("Invalid RCB_REG_ADDR Setting: %0d", RCB_REG_ADDR);
   end
-
-//  assign accept_write_req = !sef_read && hpb_wr_req && !ignore_hpb_wr_req;
 
   //---------------------------------------------------
   // Register the output data to help with TCKO
@@ -82,8 +92,6 @@ module rcb
       rcb_data <= RAM[ram_addr];
     end
   end
-
-  // FIXME - need to register all inputs from decoder based on PARAM or we will be off a clk?
 
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
@@ -117,7 +125,7 @@ module rcb
       end
     end
   end else begin
-    $error ("Invalid RCB_REG_ADDR Setting");
+    $error ("Invalid RCB_REG_ADDR Setting: %0d", RCB_REG_ADDR);
   end
 
   //---------------------------------------------------
@@ -129,7 +137,7 @@ module rcb
     end else if (accept_write_req) begin
       ignore_hpb_wr_req   <= 1'b1;
     end else if (!hpb_wr_req) begin
-      ignore_hpb_wr_req   <= 1'b0;       // WR Req de-asserted.  De-assert ignore
+      ignore_hpb_wr_req   <= 1'b0;
     end
   end
 
