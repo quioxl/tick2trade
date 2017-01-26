@@ -33,7 +33,7 @@ module tts
   input                clk,                // Core clock
   input                reset_n,            // Active low core reset
 
-  avalon_if            feed_if,
+  avalon_if            dec_if,
   host_interface       host_interface_in,
   order_interface      order_if
 );
@@ -57,6 +57,17 @@ module tts
   hpb_if    #(.RCB_RAM_ADDR_WIDTH(ORCB_ADDR_WIDTH),
               .RCB_RAM_WIDTH(ORCB_RAM_WIDTH)
              ) orcb_hpb_if();
+
+    reg          tts_sym_vld;
+    reg  [13 :0] tts_rd_addr;
+    reg  [2  :0] sym_idx;
+
+    wire         sef_rd_srcb, sef_rd_prcb, sef_rd_vrcb, sef_rd_orcb;
+    wire         sef_pcmp_load_a, sef_pcmp_load_b, sef_vcmp_load_a, sef_vcmp_load_b;
+    wire         sef_out_valid;   
+  
+    wire [63 :0] srcb_data, vrcb_data;
+    wire [127:0] prcb_data, orcb_data;
 
   //------------------------------------------------------------------------------------------------------------------
   // HDP
@@ -82,9 +93,35 @@ module tts
 
   );
 
+  //------------------------------------------------------------------------------------------------------------------
   // FSM
-
-  // Compare
+  //------------------------------------------------------------------------------------------------------------------
+  sef sef_i (
+    // Clk/Reset
+    .clk               (clk),
+    .reset_n           (reset_n),
+   
+    // Feed Decoder IF
+    .dec_if            (dec_if),
+   
+    // Symbol ID RCB
+    .sef_rd_srcb       (sef_rd_srcb),
+    .tts_sym_vld       (tts_sym_vld),
+   
+    // Price Path (RCB & CMP)
+    .sef_rd_prcb       (sef_rd_prcb),
+    .sef_pcmp_load_a   (sef_pcmp_load_a),
+    .sef_pcmp_load_b   (sef_pcmp_load_b),
+   
+    // Volume Path (RCB & CMP)
+    .sef_rd_vrcb       (sef_rd_vrcb),
+    .sef_vcmp_load_a   (sef_vcmp_load_a),
+    .sef_vcmp_load_b   (sef_vcmp_load_b),
+   
+    // Order RCB
+    .sef_rd_orcb       (sef_rd_orcb),
+    .sef_out_valid     (sef_out_valid)
+);
 
   //------------------------------------------------------------------------------------------------------------------
   // Symbol RCB
@@ -95,18 +132,52 @@ module tts
   ) srcb_i (
 
     // Clock/Reset
-    .clk              ( clk         ),
-    .reset_n          ( reset_n     ),
+    .clk              (clk),
+    .reset_n          (reset_n),
 
-    .t2t_rd_addr      ('h0),
-    .sef_read         ('h0),
+    .t2t_rd_addr      (dec_if.data[37:24]),  // Read address is the Symbol ID
+    .sef_read         (sef_rd_srcb),
     .sef_inmsg        ('h0),
 
-    .rcb_data         (),
+    .rcb_data         (srcb_data),
 
-    .hpb_if_i         ( srcb_hpb_if )
+    .hpb_if_i         (srcb_hpb_if)
 
   );
+
+  // Since the Symbol RCB is a library component, a little bit of 
+  // muxing needs to be done in the wrapper to extract the correct address
+  // if this produces a bad timing path, the sRCB could be customized
+  // and the byte muxing done prior to the register
+  always @(posedge clk) begin
+    if      (!reset_n)    sym_idx <= 2'b00;
+    else if (sef_rd_srcb) sym_idx <= dec_if.data[39:38];
+  end
+
+  always_comb begin
+    case(sym_idx)
+      2'b00   : begin
+                tts_rd_addr = srcb_data[13:0];
+                tts_sym_vld = srcb_data[15];
+                end
+      2'b01   : begin
+                tts_rd_addr = srcb_data[29:16];
+                tts_sym_vld = srcb_data[31];
+                end
+      2'b10   : begin
+                tts_rd_addr = srcb_data[45:32];
+                tts_sym_vld = srcb_data[47];
+                end
+      2'b11   : begin
+                tts_rd_addr = srcb_data[61:48];
+                tts_sym_vld = srcb_data[63];
+                end
+      default : begin
+                tts_rd_addr = 14'hX;
+                tts_sym_vld = 1'bx;
+                end
+    endcase
+  end
 
   //------------------------------------------------------------------------------------------------------------------
   // Price RCB
@@ -117,16 +188,16 @@ module tts
   ) prcb_i (
 
     // Clock/Reset
-    .clk              ( clk         ),
-    .reset_n          ( reset_n     ),
+    .clk              (clk),
+    .reset_n          (reset_n),
 
-    .t2t_rd_addr      ('h0),
-    .sef_read         ('h0),
+    .t2t_rd_addr      (tts_rd_addr),
+    .sef_read         (sef_rd_prcb),
     .sef_inmsg        ('h0),
 
-    .rcb_data         (),
+    .rcb_data         (prcb_data),
 
-    .hpb_if_i         ( prcb_hpb_if )
+    .hpb_if_i         (prcb_hpb_if)
 
   );
 
@@ -139,18 +210,20 @@ module tts
   ) vrcb_i (
 
     // Clock/Reset
-    .clk              ( clk         ),
-    .reset_n          ( reset_n     ),
+    .clk              (clk),
+    .reset_n          (reset_n),
 
-    .t2t_rd_addr      ('h0),
-    .sef_read         ('h0),
+    .t2t_rd_addr      (tts_rd_addr),
+    .sef_read         (sef_rd_vrcb),
     .sef_inmsg        ('h0),
 
-    .rcb_data         (),
+    .rcb_data         (vrcb_data),
 
-    .hpb_if_i         ( vrcb_hpb_if )
+    .hpb_if_i         (vrcb_hpb_if)
 
   );
+
+  // Compare
 
   //------------------------------------------------------------------------------------------------------------------
   // Order RCB
@@ -161,16 +234,16 @@ module tts
   ) orcb_i (
 
     // Clock/Reset
-    .clk              ( clk         ),
-    .reset_n          ( reset_n     ),
+    .clk              (clk),
+    .reset_n          (reset_n),
 
-    .t2t_rd_addr      ('h0),
-    .sef_read         ('h0),
+    .t2t_rd_addr      (tts_rd_addr),
+    .sef_read         (sef_rd_orcb),
     .sef_inmsg        ('h0),
 
-    .rcb_data         (),
+    .rcb_data         (orcb_data),
 
-    .hpb_if_i         ( orcb_hpb_if )
+    .hpb_if_i         (orcb_hpb_if)
 
   );
 
