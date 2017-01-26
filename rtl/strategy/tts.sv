@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------------
 
 //import tts_pkg::*;
+import t2t_pkg::*;
 
 module tts
 #(
@@ -64,7 +65,8 @@ module tts
 
     wire         sef_rd_srcb, sef_rd_prcb, sef_rd_vrcb, sef_rd_orcb;
     wire         sef_pcmp_load_a, sef_pcmp_load_b, sef_vcmp_load_a, sef_vcmp_load_b;
-    wire         sef_out_valid;
+    wire         sef_out_valid;   
+    wire         pcmp_pass, vcmp_pass;
 
     wire [63 :0] srcb_data, vrcb_data;
     wire [127:0] prcb_data, orcb_data;
@@ -124,7 +126,11 @@ module tts
 );
 
   //------------------------------------------------------------------------------------------------------------------
-  // Symbol RCB
+  // Symbol Translation
+  //
+  // Each SymbolID is translated into a Physical address used to 
+  // index into the parameter RAMs for comparison with the message field
+  // 
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_HOST_ARB    ( SRCB_RCB_HOST_ARB ),
@@ -135,7 +141,7 @@ module tts
     .clk              (clk),
     .reset_n          (reset_n),
 
-    .t2t_rd_addr      (dec_if.data[37:24]),  // Read address is the Symbol ID
+    .t2t_rd_addr      (dec_if.dec_data.beat1.symid),  // Read address is the Symbol ID
     .sef_read         (sef_rd_srcb),
     .sef_inmsg        ('h0),
 
@@ -151,7 +157,7 @@ module tts
   // and the byte muxing done prior to the register
   always @(posedge clk) begin
     if      (!reset_n)    sym_idx <= 2'b00;
-    else if (sef_rd_srcb) sym_idx <= dec_if.data[39:38];
+    else if (sef_rd_srcb) sym_idx <= dec_if.dec_data.beat1.symid;
   end
 
   always_comb begin
@@ -180,7 +186,8 @@ module tts
   end
 
   //------------------------------------------------------------------------------------------------------------------
-  // Price RCB
+  // Price Path
+  // 
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_HOST_ARB    ( PRCB_RCB_HOST_ARB ),
@@ -201,8 +208,30 @@ module tts
 
   );
 
+  cmp # (
+   .CMP_RAM_WIDTH    (PRCB_RAM_WIDTH),
+   .CMP_CYCA_WIDTH   (MSG_SYMID), // This is because the end of the previous field defines 
+                                  // the size of the next field, in this case the Price field
+   .CMP_REG_CYCB     (1),
+   .CMP_PIPE         (1)
+  ) pcmp_i (
+
+    // Clock/Reset
+    .clk              (clk),
+    .reset_n          (reset_n),
+
+    .rcb_data         (prcb_data),
+    .tts_field        ({dec_if.dec_data.beat1.price_up, dec_if.dec_data.beat2.price_dn}),
+
+    .sef_load_a       (sef_pcmp_load_a),
+    .sef_load_b       (sef_pcmp_load_b),
+
+    .cmp_pass         (pcmp_pass)
+
+  );
   //------------------------------------------------------------------------------------------------------------------
-  // Volume RCB
+  // Volume Path
+  // 
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_HOST_ARB    ( VRCB_RCB_HOST_ARB ),
@@ -223,8 +252,27 @@ module tts
 
   );
 
-  // Compare
+  cmp # (
+   .CMP_RAM_WIDTH    (VRCB_RAM_WIDTH),
+   .CMP_CYCA_WIDTH   (MSG_PRICE), // This is because the end of the previous field defines 
+                                  // the size of the next field, in this case the Volume field
+   .CMP_REG_CYCB     (0),
+   .CMP_PIPE         (0)
+  ) vcmp_i (
 
+    // Clock/Reset
+    .clk              (clk),
+    .reset_n          (reset_n),
+
+    .rcb_data         (vrcb_data),
+    .tts_field        ({dec_if.dec_data.beat2.vol_up, dec_if.dec_data.beat3.vol_dn}),
+
+    .sef_load_a       (sef_vcmp_load_a),
+    .sef_load_b       (sef_vcmp_load_b),
+
+    .cmp_pass         (vcmp_pass)
+
+  );
   //------------------------------------------------------------------------------------------------------------------
   // Order RCB
   //------------------------------------------------------------------------------------------------------------------
@@ -246,5 +294,20 @@ module tts
     .hpb_if_i         (orcb_hpb_if)
 
   );
+
+  // FIXME : Right now this always drives valid regardless
+  //         of ready. Need to add a shadow register to hold
+  //         valid if ready deasserts
+  always @(posedge clk) begin
+    if (!reset_n) begin
+      order_if.valid <= 1'b0;
+      order_if.data  <= '0;
+    end else begin
+      order_if.valid <= sef_out_valid & vcmp_pass & pcmp_pass;
+      order_if.data  <= orcb_data;
+    end
+  end
+ 
+  assign dec_if.ready = order_if.ready; // The tts does not incur stalls
 
 endmodule // tts

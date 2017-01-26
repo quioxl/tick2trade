@@ -21,12 +21,12 @@ module hpb
   input                                   areset_n,           // Host Asycn Reset
 
   // Feed Decoder IF
-  host_interface                          host_if,  // Host Interface on Async Clock
+  host_interface                          host_if,            // Host Interface on Async Clock
 
-  hpb_if                                  srcb_hpb_if,      // Symbol RCB RAM Interface
-  hpb_if                                  prcb_hpb_if,      // Price RCB RAM Interface
-  hpb_if                                  vrcb_hpb_if,      // Volume RCB RAM Interface
-  hpb_if                                  orcb_hpb_if       // Order RCB RAM Interface
+  hpb_if                                  srcb_hpb_if,        // Symbol RCB RAM Interface
+  hpb_if                                  prcb_hpb_if,        // Price RCB RAM Interface
+  hpb_if                                  vrcb_hpb_if,        // Volume RCB RAM Interface
+  hpb_if                                  orcb_hpb_if         // Order RCB RAM Interface
 
 );
 
@@ -162,10 +162,6 @@ module hpb
             host_interface_synced.in_config_accept <= 'b0;
           end
         end
-
-        //default begin
-        //  $error ("Invalid RAM Selection: 8'h%0h", host_msg_map.ram);
-        //end
       endcase
 
 
