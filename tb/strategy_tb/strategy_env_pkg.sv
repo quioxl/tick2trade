@@ -2,6 +2,7 @@
 package strategy_env_pkg;
   import uvm_pkg::*;
   import avalon_pkg::*;
+  import feed_agent_pkg::*;
   import host_agent_pkg::*;
   import order_pkg::*;
   import symbol_map_pkg::*;

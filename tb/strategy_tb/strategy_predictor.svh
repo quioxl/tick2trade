@@ -25,6 +25,11 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   endfunction : write_host
 
   function void write(avalon_seq_item_base t);
+    feed_message_item feed_item;
+    //if (!$cast(feed_item, t))
+    //  `uvm_fatal("strategy_predictor", "$cast failed to a feed_message_item")
+    //feed_item.msg_unpack();
+    
     //Use the values stored in the mapper to see if a match exists.
     // If it does, then send the order information to the scoreboard.
     

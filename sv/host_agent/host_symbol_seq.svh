@@ -3,12 +3,12 @@ class host_symbol_seq extends uvm_sequence #(host_item);
   `uvm_object_utils(host_symbol_seq)
 
   //Data Members
-  symbol_t      symbol;
-  bit [31:0]    min_vol;
-  bit [31:0]    max_vol;
-  bit [63:0]    min_price;
-  bit [63:0]    max_price;
-  bit [127:0]   order;
+  rand symbol_t      symbol;
+  rand bit [31:0]    min_vol;
+  rand bit [31:0]    max_vol;
+  rand bit [63:0]    min_price;
+  rand bit [63:0]    max_price;
+  rand bit [127:0]   order;
   bit           sym_update;
   
   map_mem_t     map_addr;
