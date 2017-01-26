@@ -5,11 +5,8 @@
 //
 // ---------------------------------------------------------------------------
 
-//import tts_pkg::*;
-
 module rcb
 #(
-  parameter RCB_HOST_ARB       = 0,                      // Control over write arbitration
   parameter RCB_RAM_ADDR_WIDTH = 14,                     // Address width parameter
   parameter RCB_RAM_WIDTH      = 64                      // Width of the RAM required to hold per symbol parameters
 ) (
@@ -21,12 +18,9 @@ module rcb
   // Feed Decoder IF
   input      [(RCB_RAM_ADDR_WIDTH-1):0]   t2t_rd_addr,    // Address from Feed Decoder
   input                                   sef_read,       // Read strobe
-  input                                   sef_inmsg,      //
 
   output reg      [(RCB_RAM_WIDTH-1):0]   rcb_data,       // Output data to comparator
-
-  // Host Config IF
-  hpb_if                                  hpb_if_i
+  hpb_if                                  hpb_if_i        // Host Config interface
 
 );
 
@@ -40,7 +34,6 @@ module rcb
   reg                       [13:0] ram_addr;                        // RAM Address
   reg                              accept_write_req;                // Flag indicating if the Wr Request should be accepted
   reg                              ignore_hpb_wr_req_q;             // Flag indicating if Wr Req input should be ignored
-  reg                              stall_host_write;                // Flag indicating if a write should be blocked
 
   //---------------------------------------------------------------------
   // Storage RAM - Vivado should infer single port BRAM
@@ -49,22 +42,8 @@ module rcb
   //---------------------------------------------------------------------
   reg        [(RCB_RAM_WIDTH-1):0] RAM[RAM_DEPTH-1:0];
 
-  //---------------------------------------------------
-  // Only accept write if read isn't requested and
-  // previous write request has been de-asserted
-  //---------------------------------------------------
-  always_comb begin
-    if (RCB_HOST_ARB == 1) begin
-      stall_host_write = sef_inmsg;
-    end else if (RCB_HOST_ARB == 0) begin
-      stall_host_write = sef_read;
-    end else begin
-      $error ("Invalid RCB_HOST_ARB Setting: %0d", RCB_HOST_ARB);
-    end
-  end
-
   // Flag indicating if a write request is accepted
-  assign accept_write_req = !stall_host_write && hpb_if_i.hpb_wr_req && !ignore_hpb_wr_req_q;
+  assign accept_write_req = !sef_read && hpb_if_i.hpb_wr_req && !ignore_hpb_wr_req_q;
 
   //---------------------------------------------------
   // Register the output data to help with TCKO
