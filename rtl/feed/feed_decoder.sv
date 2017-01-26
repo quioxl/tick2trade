@@ -208,16 +208,29 @@ module feed_decoder #(
         msg_state.len         <=  pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH];
       end
 
+      // Remaining length for the current message users counters with an extra bit. These
+      // counters count down below 0 when all bytes have been sent. This enables only
+      // looking at the top bit of this field to get asserted (which happens when it goes 
+      // negative).
+      if (pkt[0].sop) begin
+        msg_state.len_rem <= {1'b0,pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH]}-
+                             C_PKT_BEAT_BYTES-1;
+      end else if (msg_state.active) begin
+        msg_state.len_rem <= msg_state.len_rem - C_PKT_BEAT_BYTES;
+      end
+
+
+
       // GOT UP TO HERE, stuff below not right
 
 
       if (~msg_state.active || msg_state.eop) begin
         msg_state.len   <= pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH];
 
-        // The counters below count down to -1, which is why there is the extra
-        // value subtracted initially
-        msg_state.len_rem <= {1'b0,pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH]}-
-                             C_PKT_BEAT_BYTES-1;
+//        // The counters below count down to -1, which is why there is the extra
+//        // value subtracted initially
+//        msg_state.len_rem <= {1'b0,pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH]}-
+//                             C_PKT_BEAT_BYTES-1;
         msg_state.off     <= C_MSG_CNT_BYTES+
                              C_MSG_LEN_BYTES+1;
         msg_state.nxt_off <= msg_state.off +
