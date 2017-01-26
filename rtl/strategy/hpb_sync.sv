@@ -17,7 +17,7 @@ module hpb_sync (
   input                                   areset_n,              // Host Async Reset
 
   // Feed Decoder IF
-  host_interface                          host_interface_in,     // Host Interface on Async Clock
+  host_interface                          host_if,               // Host Interface on Async Clock
   host_interface                          host_interface_synced  // Host IF synchronized to core clock
 
 );
@@ -25,12 +25,12 @@ module hpb_sync (
   // Tied off now.  Put async in if time allows
   always_comb begin
     //Input signals
-    host_interface_synced.clk              = host_interface_in.clk;
-    host_interface_synced.reset_n          = host_interface_in.reset_n;
-    host_interface_synced.in_config_valid  = host_interface_in.in_config_valid;
-    host_interface_synced.in_config_data   = host_interface_in.in_config_data;
+    host_interface_synced.clk              = host_if.clk;
+    host_interface_synced.reset_n          = host_if.reset_n;
+    host_interface_synced.in_config_valid  = host_if.in_config_valid;
+    host_interface_synced.in_config_data   = host_if.in_config_data;
 
     //Output signals
-    host_interface_in.in_config_accept = host_interface_synced.in_config_accept;
+    host_if.in_config_accept = host_interface_synced.in_config_accept;
   end
 endmodule // hpb_sync
