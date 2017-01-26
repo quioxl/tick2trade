@@ -94,15 +94,18 @@ module hpb
     vrcb_hpb_if.hpb_wr_req = 'b0;
     orcb_hpb_if.hpb_wr_req = 'b0;
 
-    case (host_msg_map.ram)
-      tts_pkg::SRCB: srcb_hpb_if.hpb_wr_req = 'b1;
-      tts_pkg::PRCB: prcb_hpb_if.hpb_wr_req = 'b1;
-      tts_pkg::VRCB: vrcb_hpb_if.hpb_wr_req = 'b1;
-      tts_pkg::ORCB: orcb_hpb_if.hpb_wr_req = 'b1;
-      default begin
-        $error ("Invalid RAM Selection: 8'h%0h", host_msg_map.ram);
-      end
-    endcase
+    if (host_interface_synced.in_config_valid) begin
+      case (host_msg_map.ram)
+        tts_pkg::SRCB: srcb_hpb_if.hpb_wr_req = 'b1;
+        tts_pkg::PRCB: prcb_hpb_if.hpb_wr_req = 'b1;
+        tts_pkg::VRCB: vrcb_hpb_if.hpb_wr_req = 'b1;
+        tts_pkg::ORCB: orcb_hpb_if.hpb_wr_req = 'b1;
+
+        // default begin
+     //   $error ("Invalid RAM Selection: 8'h%0h", host_msg_map.ram);
+     // end
+      endcase
+    end
   end
 
   //-------------------------------------------------
@@ -155,9 +158,9 @@ module hpb
           end
         end
 
-        default begin
-          $error ("Invalid RAM Selection: 8'h%0h", host_msg_map.ram);
-        end
+        //default begin
+        //  $error ("Invalid RAM Selection: 8'h%0h", host_msg_map.ram);
+        //end
       endcase
 
 

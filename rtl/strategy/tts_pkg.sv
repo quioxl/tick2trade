@@ -8,11 +8,11 @@
 package tts_pkg;
 
   // Start offsets for fields in payload
-  parameter  CMD_B             = 0;
-  parameter  RAM_B             = 0;
-  parameter  ADDR_B            = 0;
-  parameter  RES_B             = 0;
-  parameter  BYTE_EN_B         = 0;
+  parameter  CMD_B             = 248;
+  parameter  RAM_B             = 240;
+  parameter  ADDR_B            = 224;
+  parameter  RES_B             = 216;
+  parameter  BYTE_EN_B         = 192;
   parameter  DATA_B            = 0;
 
   // Number of bytes in field

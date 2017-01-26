@@ -69,7 +69,7 @@ module tts
     // Clock/Reset
     .clk                ( clk               ),
     .reset_n            ( reset_n           ),
-           
+
     .aclk               ( clk               ), //FIXME
     .areset_n           ( reset_n           ), //FIXME
 
@@ -98,9 +98,9 @@ module tts
     .clk              ( clk         ),
     .reset_n          ( reset_n     ),
 
-    .t2t_rd_addr      (),
-    .sef_read         (),
-    .sef_inmsg        (),
+    .t2t_rd_addr      ('h0),
+    .sef_read         ('h0),
+    .sef_inmsg        ('h0),
 
     .rcb_data         (),
 
@@ -120,9 +120,9 @@ module tts
     .clk              ( clk         ),
     .reset_n          ( reset_n     ),
 
-    .t2t_rd_addr      (),
-    .sef_read         (),
-    .sef_inmsg        (),
+    .t2t_rd_addr      ('h0),
+    .sef_read         ('h0),
+    .sef_inmsg        ('h0),
 
     .rcb_data         (),
 
@@ -142,9 +142,9 @@ module tts
     .clk              ( clk         ),
     .reset_n          ( reset_n     ),
 
-    .t2t_rd_addr      (),
-    .sef_read         (),
-    .sef_inmsg        (),
+    .t2t_rd_addr      ('h0),
+    .sef_read         ('h0),
+    .sef_inmsg        ('h0),
 
     .rcb_data         (),
 
@@ -164,9 +164,9 @@ module tts
     .clk              ( clk         ),
     .reset_n          ( reset_n     ),
 
-    .t2t_rd_addr      (),
-    .sef_read         (),
-    .sef_inmsg        (),
+    .t2t_rd_addr      ('h0),
+    .sef_read         ('h0),
+    .sef_inmsg        ('h0),
 
     .rcb_data         (),
 
