@@ -7,26 +7,28 @@
 module tick2trade #(
 
   // Feed Decoder params
-  parameter C_PKT_BEAT_BYTES     = 8,
-  parameter C_PKT_MAX_BYTES      = 1500,
-  parameter C_MSG_CNT_BYTES      = 2,
-  parameter C_MSG_LEN_BYTES      = 2,
-  parameter C_MSG_MIN_BYTES      = 8,
-  parameter C_MSG_MAX_BYTES      = 32,
+  parameter C_PKT_BEAT_BYTES      = 8,
+  parameter C_PKT_MAX_BYTES       = 1500,
+  parameter C_MSG_CNT_BYTES       = 2,
+  parameter C_MSG_LEN_BYTES       = 2,
+  parameter C_MSG_MIN_BYTES       = 8,
+  parameter C_MSG_MAX_BYTES       = 32,
+  parameter C_DEC_IF_DATA_WIDTH   = 64,
+  parameter C_DEC_IF_EMPTY_WIDTH  = 64,
 
   //   Strategy Params
-  parameter SRCB_RCB_HOST_ARB    =  0,
-  parameter SRCB_RAM_WIDTH       =  64,
-  parameter SRCB_ADDR_WIDTH      =  14,
-  parameter PRCB_RCB_HOST_ARB    =  0,
-  parameter PRCB_RAM_WIDTH       =  128,
-  parameter PRCB_ADDR_WIDTH      =  14,
-  parameter VRCB_RCB_HOST_ARB    =  0,
-  parameter VRCB_RAM_WIDTH       =  64,
-  parameter VRCB_ADDR_WIDTH      =  14,
-  parameter ORCB_RCB_HOST_ARB    =  0,
-  parameter ORCB_RAM_WIDTH       =  128,
-  parameter ORCB_ADDR_WIDTH      =  14
+  parameter SRCB_RCB_HOST_ARB     =  0,
+  parameter SRCB_RAM_WIDTH        =  64,
+  parameter SRCB_ADDR_WIDTH       =  14,
+  parameter PRCB_RCB_HOST_ARB     =  0,
+  parameter PRCB_RAM_WIDTH        =  128,
+  parameter PRCB_ADDR_WIDTH       =  14,
+  parameter VRCB_RCB_HOST_ARB     =  0,
+  parameter VRCB_RAM_WIDTH        =  64,
+  parameter VRCB_ADDR_WIDTH       =  14,
+  parameter ORCB_RCB_HOST_ARB     =  0,
+  parameter ORCB_RAM_WIDTH        =  128,
+  parameter ORCB_ADDR_WIDTH       =  14
 
 ) (
 
@@ -37,55 +39,18 @@ module tick2trade #(
   avalon_if                             dec_in_if,                // Feed Decoder IF (Avalon)
   host_interface                        host_if,
 
-//  //Inputs
-//  in_valid,                  // Valid data present
-//  in_startofpacket,          // Start of message
-//  in_endofpacket,            // End of message
-//  in_data,                   // Data payload
-//  in_empty,                  // Empty bytes indicator
-//  in_error,                  // Error indicator
-
-  //Outputs
-  in_ready,                  // Ready for message
-
   //--------------------------------------------------
   // Strategy
   //--------------------------------------------------
   order_interface                       order_if
-  //Inputs
-//  out_ready,
-//
-//  //Outputs
-//  out_valid,
-//  out_data
 
   );
 
 
-
-  //--------------------------------------------------
-  // Feed Decoder
-  //--------------------------------------------------
-
-
-//  input                                 in_valid;
-//  input                                 in_startofpacket;
-//  input                                 in_endofpacket;
-//  input    [(FEED_MSG_DATA_W-1):0]      in_data;
-//  input  [(FEED_EMPTY_DATA_W-1):0]      in_empty;
-//  input                                 in_error;
-//	output                                in_ready;
-
-  //--------------------------------------------------
-  // Strategy
-  //--------------------------------------------------
-//  input                                 out_ready;
-//  output    [(STRAT_ORDER_DATA_W-1):0]  out_data;
-//  output                                out_ready;
-
-
-  // Interfaces
-  avalon_if                             dec_if,
+  // Interface between Feed and Strategy
+  avalon_if #(.DATA_WIDTH  (C_DEC_IF_DATA_WIDTH),
+              .EMPTY_WIDTH (C_DEC_IF_EMPTY_WIDTH)
+             ) dec_if ();
 
   //--------------------------------------------------
   // Feed Decoder
