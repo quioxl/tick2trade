@@ -6,10 +6,13 @@ class sanity_test extends strategy_test_base;
   endfunction
 
   virtual task run_phase(uvm_phase phase);
-    //strategy_simple_seq seq_h;
+    random_host_program_seq host_seq_h;
+    random_feed_traffic_seq feed_seq_h;
     super.run_phase(phase);
-    //seq_h = strategy_simple_seq::type_id::create("seq_h");
-    //seq_h.start(seqr_h);
+    host_seq_h = random_host_program_seq::type_id::create("host_seq_h");
+    host_seq_h.start(env_h.host_agent_h.seqr_h);
+    feed_seq_h = random_feed_traffic_seq::type_id::create("feed_seq_h");
+    feed_seq_h.start(env_h.master_agent_h.seqr_h);
     #10us;
     phase.drop_objection(this);
   endtask

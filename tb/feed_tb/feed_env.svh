@@ -42,7 +42,7 @@ class feed_env extends uvm_env;
     layering_h.feed_message_seqr_h = feed_message_seqr_h;
     layering_h.avalon_seqr_h = master_agent_h.seqr_h;
     feed_ap.connect(monitor_h.ap);
-    master_agent_h.monitor_h.ap.connect(monitor_h.analysis_export);
+    master_agent_h.ap.connect(monitor_h.analysis_export);
     monitor_h.ap.connect(predictor_h.analysis_export);
     predictor_h.ap.connect(scoreboard_h.expect_ai);
     slave_agent_h.ap.connect(scoreboard_h.actual_ai);

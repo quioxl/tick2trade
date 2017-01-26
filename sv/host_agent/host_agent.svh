@@ -10,7 +10,7 @@ class host_agent extends uvm_agent;
   const string report_id = "HOST_AGENT";
 
   host_driver                           driver_h;
-  uvm_sequencer #(host_item, host_item) sequencer_h;
+  uvm_sequencer #(host_item, host_item) seqr_h;
   host_monitor                          monitor_h;
   uvm_analysis_port #(host_item)        mon_out_ap;
 
@@ -35,7 +35,7 @@ class host_agent extends uvm_agent;
       //Push the config down into the driver
       driver_h.cfg_h = cfg_h;
       //`uvm_info(report_id, "Newing host sequencer", UVM_LOW )
-      sequencer_h = new("sequencer_h", this);
+      seqr_h = new("seqr_h", this);
       //Place the sequencer into the resource database for sequences to use
       //uvm_config_db #(uvm_sequencer #(host_item, host_item))::set(null,"*","host_sequencer",m_sequencer);
     end
@@ -54,7 +54,7 @@ class host_agent extends uvm_agent;
     // connect up the uvm ports
     if (cfg_h.active) begin
       //Connect the driver's port
-      driver_h.seq_item_port.connect(sequencer_h.seq_item_export);
+      driver_h.seq_item_port.connect(seqr_h.seq_item_export);
     end
     // connect the analysis port in the monitor to the agent port
     monitor_h.result_from_monitor_ap.connect(mon_out_ap);

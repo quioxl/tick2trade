@@ -7,7 +7,7 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
   //strategy_message_item strategy_trans_h;
   uvm_analysis_imp_host #(host_item, strategy_predictor) host_export;
-  uvm_analysis_port #(avalon_seq_item_base) ap;  //CHECK_ME: Needs to be updated to order type
+  uvm_analysis_port #(order_item) ap;
 
   //Structures for holding information programed into the host interface ram
   host_order_t temp_order;
@@ -25,6 +25,11 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   endfunction : write_host
 
   function void write(avalon_seq_item_base t);
+    feed_message_item feed_item;
+    //if (!$cast(feed_item, t))
+    //  `uvm_fatal("strategy_predictor", "$cast failed to a feed_message_item")
+    //feed_item.msg_unpack();
+    
     //Use the values stored in the mapper to see if a match exists.
     // If it does, then send the order information to the scoreboard.
     
