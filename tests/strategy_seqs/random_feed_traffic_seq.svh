@@ -17,7 +17,7 @@ class random_feed_traffic_seq extends uvm_sequence #(feed_message_item);
         `uvm_fatal("SEQ","Transaction randomization failed")
       end
       `uvm_info("SEQ",$sformatf("Sending feed message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
-      feed_trans_h.msg_pack();
+      //feed_trans_h.msg_pack();
       finish_item(feed_trans_h);
     end
   endtask

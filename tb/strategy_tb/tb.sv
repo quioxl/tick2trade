@@ -37,7 +37,7 @@ module tb;
   tts DUT (
            .clk                (clk),
            .reset_n            (reset_n),
-           .feed_if            (feed_if),
+           .dec_if             (feed_if),
            .host_interface_in  (host_if),
            .order_if           (order_if)
            );
