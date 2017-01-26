@@ -3,7 +3,7 @@ class feed_test_base extends uvm_test;
 
   feed_env env_h;
   feed_env_config cfg_h;
-  uvm_sequencer #(avalon_seq_item_base,avalon_seq_item_base) seqr_h;
+  uvm_sequencer #(avalon_message_item) seqr_h;
 
   function new (string name = "feed_test_base", uvm_component parent = null);
     super.new(name,parent);

@@ -12,7 +12,7 @@ class feed_env extends uvm_env;
 
   uvm_analysis_port #(avalon_seq_item_base) feed_ap;
 
-  uvm_sequencer#(avalon_seq_item_base) feed_message_seqr_h;
+  uvm_sequencer#(avalon_message_item) feed_message_seqr_h;
 
   function new(string name, uvm_component parent);
     super.new(name,parent);

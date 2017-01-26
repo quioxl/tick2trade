@@ -2,7 +2,7 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
 
   `uvm_object_utils(feed_message_to_avalon_seq)
 
-  uvm_sequencer #(avalon_seq_item_base) up_seqr;
+  uvm_sequencer #(avalon_message_item) up_seqr;
 
   rand int next_down_size;
   bit [7:0] accum_payload [$];
@@ -17,7 +17,7 @@ class feed_message_to_avalon_seq extends uvm_sequence #(avalon_seq_item_base);
   endfunction
 
   virtual task body();
-    avalon_seq_item_base up_trans_h;
+    avalon_message_item up_trans_h;
     avalon_seq_item_base down_trans_h;
     bit [15:0] msg_size;
     forever begin

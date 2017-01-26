@@ -1,4 +1,4 @@
-class feed_random_seq extends uvm_sequence #(avalon_seq_item_base);
+class feed_random_seq extends uvm_sequence #(avalon_message_item);
 
   `uvm_object_utils(feed_random_seq)
 
@@ -9,8 +9,8 @@ class feed_random_seq extends uvm_sequence #(avalon_seq_item_base);
   endfunction
 
   task body();
-    feed_message_item feed_trans_h;
-    feed_trans_h = feed_message_item::type_id::create("feed_trans_h");
+    avalon_message_item feed_trans_h;
+    feed_trans_h = avalon_message_item::type_id::create("feed_trans_h");
     repeat (trans_count) begin
       start_item(feed_trans_h);
       if (!feed_trans_h.randomize()) begin
