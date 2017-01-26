@@ -9,11 +9,16 @@ class host_symbol_seq extends uvm_sequence #(host_item);
   rand bit [63:0]    min_price;
   rand bit [63:0]    max_price;
   rand bit [127:0]   order;
-  bit           sym_update;
+  bit                sym_update;
   
   map_mem_t     map_addr;
   symbol_mapper mapper = symbol_mapper::get_mapper();
-  
+
+  //Constraints
+  constraint volume_c { soft min_vol < max_vol; }
+  constraint price_c  { soft min_price < max_price; }
+
+  //Methods
   function new(string name = "host_symbol_seq");
     super.new(name);
   endfunction : new

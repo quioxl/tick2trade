@@ -9,6 +9,8 @@ package strategy_env_pkg;
 
   //typedefs
   typedef struct packed {
+    symbol_t     symbol;
+    map_addr_t   map_addr;
     bit [31:0]   min_vol;
     bit [31:0]   max_vol;
     bit [63:0]   min_price;

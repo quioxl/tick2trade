@@ -10,7 +10,7 @@ package symbol_map_pkg;
   typedef struct     packed {
     bit              valid;
     bit              unused;
-    map_addr_t   addr;
+    map_addr_t       addr;
   } map_mem_t;
 
 

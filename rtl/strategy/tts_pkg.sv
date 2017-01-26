@@ -27,7 +27,7 @@ package tts_pkg;
     SRCB = 8'd1,             // Symbol RCB
     PRCB = 8'd2,             // Price RCB
     VRCB = 8'd4,             // Volume RCB
-    ORCB = 8'd8,             // Order RCB
+    ORCB = 8'd8              // Order RCB
   } t_RAM_ENCODING;
 
   typedef struct packed {
