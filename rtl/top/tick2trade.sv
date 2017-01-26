@@ -36,13 +36,9 @@ module tick2trade #(
   input                                 clk,                       // Core clock
   input                                 reset_n,                   // Core reset
 
-  avalon_if                             dec_in_if,                // Feed Decoder IF (Avalon)
-  host_interface                        host_if,
-
-  //--------------------------------------------------
-  // Strategy
-  //--------------------------------------------------
-  order_interface                       order_if
+  avalon_if                             dec_in_if,                // Feed Decoder input IF (Avalon)
+  host_interface                        host_if,                  // Host Config input IF
+  order_interface                       order_if                  // Order output IF
 
   );
 
