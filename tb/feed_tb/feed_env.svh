@@ -10,7 +10,7 @@ class feed_env extends uvm_env;
   feed_predictor predictor_h;
   feed_scoreboard scoreboard_h;
 
-  uvm_analysis_port #(avalon_seq_item_base) feed_ap;
+  uvm_analysis_port #(avalon_message_item) feed_ap;
 
   uvm_sequencer#(avalon_message_item) feed_message_seqr_h;
 

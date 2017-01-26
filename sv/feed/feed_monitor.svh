@@ -5,9 +5,9 @@ class feed_monitor extends uvm_subscriber #(avalon_seq_item_base);
     super.new(name,parent);
   endfunction
 
-  avalon_seq_item_base feed_trans_h;
+  avalon_message_item feed_trans_h;
 
-  uvm_analysis_port #(avalon_seq_item_base) ap;
+  uvm_analysis_port #(avalon_message_item) ap;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
@@ -33,10 +33,8 @@ class feed_monitor extends uvm_subscriber #(avalon_seq_item_base);
         msg.push_back(payload.pop_front());
       end
       // Send each individual message out on the analysis port. These
-      // will be of type avalon_seq_item_base (not feed messages) because
-      // they may be of arbitrary size.  It'll be up to a predictor
-      // to filter out the messages that can make it through the DUT
-      feed_trans_h = avalon_seq_item_base::type_id::create("feed_trans_h");
+      // will be of type avalon_message_item 
+      feed_trans_h = avalon_message_item::type_id::create("feed_trans_h");
       feed_trans_h.payload = msg;
       `uvm_info("MON",$sformatf("Saw message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
       ap.write(feed_trans_h);

@@ -4,7 +4,7 @@ class feed_random_seq extends uvm_sequence #(avalon_message_item);
 
   int trans_count = 1000;
 
-  function new(string name = "feed_simple_seq");
+  function new(string name = "feed_random_seq");
     super.new(name);
   endfunction
 

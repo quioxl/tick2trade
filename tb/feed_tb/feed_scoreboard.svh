@@ -2,9 +2,9 @@ class feed_scoreboard extends uvm_component;
   `uvm_component_utils(feed_scoreboard)
 
   uvm_analysis_imp_FEED_ACTUAL #(avalon_seq_item_base,feed_scoreboard) actual_ai;
-  uvm_analysis_imp_FEED_EXPECT #(feed_message_item,feed_scoreboard) expect_ai;
+  uvm_analysis_imp_FEED_EXPECT #(avalon_message_item,feed_scoreboard) expect_ai;
 
-  feed_message_item expect_q [$], actual_q [$];
+  avalon_message_item expect_q [$], actual_q [$];
 
   feed_env_config cfg_h;
 
@@ -20,42 +20,45 @@ class feed_scoreboard extends uvm_component;
   endfunction
 
   function void write_FEED_ACTUAL(avalon_seq_item_base t);
-    feed_message_item cast_item;
+    avalon_message_item copy_h;
     if (cfg_h.enable_sb == 1'b0) begin
       return;
     end
-    cast_item = feed_message_item::type_id::create("cast_item");
-    cast_item.payload = t.payload;
-    cast_item.msg_unpack();
-    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",cast_item.convert2string()),UVM_LOW)
+    // The type of object coming in is the base item, so we have to copy
+    // contents into the message_item class manually (even though there is
+    // a class relationship it isn't possible to upcast in this situation)
+    copy_h = avalon_message_item::type_id::create("copy_h");
+    copy_h.payload = t.payload;
+    // This isn't really needed but future enhancements to avalon_message_item may require it
+    copy_h.msg_unpack();
+    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",copy_h.convert2string()),UVM_LOW)
     if (expect_q.size() > actual_q.size()) begin
-      compare_items(expect_q.pop_front(),cast_item);
+      compare_items(expect_q.pop_front(),copy_h);
     end else begin
-      actual_q.push_back(cast_item);
+      // No need to make a new copy, we did that already
+      actual_q.push_back(copy_h);
     end
   endfunction
 
-  function void write_FEED_EXPECT(feed_message_item t);
-    feed_message_item copy_item;
-    uvm_object clone_item;
+  function void write_FEED_EXPECT(avalon_message_item t);
+    avalon_message_item clone_h;
     if (cfg_h.enable_sb == 1'b0) begin
       return;
     end
-    clone_item = t.clone();
-    if (!$cast(copy_item,clone_item)) begin
-      `uvm_fatal("SB","Clone failed")
-    end
-    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",copy_item.convert2string()),UVM_LOW)
+    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",t.convert2string()),UVM_LOW)
     if (actual_q.size() > expect_q.size()) begin
-      compare_items(copy_item,actual_q.pop_front());
+      compare_items(t,actual_q.pop_front());
     end else begin
-      expect_q.push_back(copy_item);
+      if (!$cast(clone_h,t.clone())) begin
+        `uvm_fatal("SB","Clone of expect item failed")
+      end
+      expect_q.push_back(clone_h);
     end
   endfunction
 
-  function void compare_items(feed_message_item expect_h, feed_message_item actual_h);
+  function void compare_items(avalon_message_item expect_h, avalon_message_item actual_h);
     if (!expect_h.compare(actual_h)) begin
-      `uvm_error("SB",$sformatf("Miscompare!\nActual:%s\nExpect:%s",actual_h.convert2string(),expect_h.convert2string()))
+      `uvm_error("SB",$sformatf("Miscompare!\n  Actual:%s\n  Expect:%s",actual_h.convert2string(),expect_h.convert2string()))
       miscompare_count++;
     end else begin
       compare_count++;
