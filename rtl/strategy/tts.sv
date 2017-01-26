@@ -142,7 +142,7 @@ module tts
     .clk                (clk),
     .reset_n            (reset_n),
 
-    .t2t_rd_addr        (dec_if.data[37:24]),  // Read address is the Symbol ID
+    .t2t_rd_addr        (dec_if.dec_data.beat1.symid[13:0]),  // Read address is the Symbol ID
     .sef_read           (sef_rd_srcb),
 
     .rcb_data           (srcb_data),
@@ -157,7 +157,7 @@ module tts
   // and the byte muxing done prior to the register
   always @(posedge clk) begin
     if      (!reset_n)    sym_idx <= 2'b00;
-    else if (sef_rd_srcb) sym_idx <= dec_if.dec_data.beat1.symid;
+    else if (sef_rd_srcb) sym_idx <= dec_if.dec_data.beat1.symid[15:14];
   end
 
   always_comb begin

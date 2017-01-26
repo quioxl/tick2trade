@@ -13,7 +13,7 @@ class incr_host_program_seq extends uvm_sequence #(host_item);
     host_symbol_seq symbol_seq_h;
     symbol_seq_h = host_symbol_seq::type_id::create("symbol_seq_h");
     for (int ii = 0; ii < trans_count; ii++) begin
-      symbol_seq_h.change_symbol_info(ii, 'h0, 'hffff, 'h0, 'hffff_ffff, {ii, 112'hdeadbeef}, m_sequencer);
+      symbol_seq_h.change_symbol_info(ii, 'h0, 'hffff_ffff, 'h0, 'hffff_ffff_ffff_ffff, {ii, 112'hdeadbeef}, m_sequencer);
     end
   endtask
 
