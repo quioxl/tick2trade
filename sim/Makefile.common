@@ -31,7 +31,8 @@ build_dut:
 
 ## Avalon agent package
 build_avalon: 
-	vlog $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
+	vlog $(TICK2TRADE_ROOT_DIR)/rtl/top/t2t_pkg.sv \
+                $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
 		$(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
 
 ## Feed agent package (layered on top of avalon agent)
