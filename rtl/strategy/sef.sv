@@ -45,13 +45,13 @@ module sef
     CMP
   } t_sef_st;
 
-  t_sef_st  state, nxt_state;
+  t_sef_st  state;
 
   bit       new_msg;
 
   // Only want to read the symbol ID when a new message comes in so
   // the Host Protocol Block can write it on other cycles
-  assign sef_rd_srcb = (state == WAIT) & (dec_if.data[63:40] == MSG_NEW);
+  assign sef_rd_srcb = (state == WAIT) & (dec_if.dec_data.beat1.msg_type == MSG_NEW);
 
   assign sef_rd_prcb     = (state == LD);
   assign sef_pcmp_load_a = (state == WAIT);
@@ -64,7 +64,7 @@ module sef
   assign sef_rd_orcb     = (state == LD);
   assign sef_out_valid   = (state == CMP);
 
-  assign new_msg = dec_if.valid & dec_if.startofpacket & (dec_if.data[63:40] == MSG_NEW);
+  assign new_msg = dec_if.valid & dec_if.startofpacket & (dec_if.dec_data.beat1.msg_type == MSG_NEW);
 
   always @(posedge clk) begin
     if (!reset_n)                        state <= WAIT;
@@ -81,7 +81,7 @@ module sef
                   end
         CMP     : begin
                   if (dec_if.valid)      state <= WAIT;
-                                         state <= CMP;
+                  else                   state <= CMP;
                   end
         default :                        state <= WAIT;
       endcase       

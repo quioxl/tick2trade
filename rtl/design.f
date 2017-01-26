@@ -5,6 +5,8 @@ $TICK2TRADE_ROOT_DIR/rtl/strategy/hpb_if.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/hpb_sync.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/hpb.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/rcb.sv
+$TICK2TRADE_ROOT_DIR/rtl/strategy/cmp_sub.sv
+$TICK2TRADE_ROOT_DIR/rtl/strategy/cmp.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/sef.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/tts.sv
 
