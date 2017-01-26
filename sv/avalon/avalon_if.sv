@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 //
 //  Description: Avalon Interface
-//
+//    // Bundle of wires (logic) to attach to either an Avalon master or slave
 // ---------------------------------------------------------------------------
 interface avalon_if();
   logic        clk;
