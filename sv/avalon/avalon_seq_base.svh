@@ -1,3 +1,4 @@
+// Base sequence for Avalon - defines a transaction handle for use in child sequences
 class avalon_seq_base extends uvm_sequence #(avalon_seq_item_base,avalon_seq_item_base);
 
     `uvm_object_utils(avalon_seq_base)

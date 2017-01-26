@@ -37,7 +37,7 @@ class host_driver extends uvm_driver #(host_item);
   endfunction : connect_phase
   
   task run_phase(uvm_phase phase);
-    `uvm_info(report_id,  "running memory agent driver",UVM_LOW )
+    //`uvm_info(report_id,  "running host agent driver",UVM_LOW )
     // set everything to zero before the reset
     host_interface_h.in_config_valid    <= '0;
     host_interface_h.in_config_data     <= '0;

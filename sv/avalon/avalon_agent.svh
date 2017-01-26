@@ -1,3 +1,9 @@
+// This is the top-level component wrapper for the Avalon protocol agent.
+// By default it will be active, i.e. instantiate a driver and sequencer.
+// The driver instantiated depends on a configuration variable toggling
+// between master/slave mode of operation.
+// A parallel monitor component snoops the avalon bus and sends transactional
+// data out to an analysis port
 class avalon_agent extends uvm_agent;
 
   `uvm_component_utils(avalon_agent)

@@ -1,6 +1,10 @@
 class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   `uvm_component_utils(strategy_predictor)
 
+  const string report_id = "STRATEGY_PREDICTOR";
+
+  int          discarded = 0;
+
   function new(string name, uvm_component parent);
     super.new(name,parent);
   endfunction
@@ -20,31 +24,83 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   endfunction : build_phase
   
   function void write_host(host_item t);
-    //Build the temp transfer until the valid comes in.  Then add that to the
-    // the orders for comparison when a symbol message comes in.  
+    map_mem_t    sym_map;
+    bit [1:0]    upper_symbol;
+    host_trans_t temp = t.data;  //Get the data into a struct for easier access
+    if (temp.cmd == RESET)
+      orders.delete();
+    else if (temp.cmd == LOAD) begin
+      //Build the temp transfer until the valid comes in.  Then add that to the
+      // the orders for comparison when a symbol message comes in.
+      case (temp.ram)
+        SYMBOL: begin
+          //Check for valid or not
+          // Figure out the two upper bits of the symbol by looking at byte_en
+          case (temp.byte_en)
+            24'h00_0003 : upper_symbol = 2'b00;
+            24'h00_000c : upper_symbol = 2'b01;
+            24'h00_0030 : upper_symbol = 2'b10;
+            24'h00_00c0 : upper_symbol = 2'b11;
+            default : `uvm_error(report_id, "Invalid byte_en for SYMBOL LOAD")
+          endcase
+          sym_map = temp.data >> (16 * upper_symbol);
+          temp_order.symbol   = {upper_symbol, temp.addr[13:0]};
+          temp_order.valid    = sym_map.valid;
+          temp_order.map_addr = sym_map.addr;
+          if (temp_order.valid == 0)
+            //Invalid: delete from array to prevent inadvertant match
+            orders.delete(temp_order.symbol);
+          else
+            //Valid: add to array for matching purposes
+            orders[temp_order.symbol] = temp_order;
+        end // case: SYMBOL
+        PRICE: begin
+          temp_order.min_price = temp.data[63:0];
+          temp_order.max_price = temp.data[127:64];
+        end
+        VOLUME: begin
+          temp_order.min_vol = temp.data[31:0];
+          temp_order.max_vol = temp.data[63:32];
+        end
+        ORDER: begin
+          temp_order.order = temp.data[127:0];
+        end
+        default: `uvm_error(report_id, "Unknown ram specified")
+      endcase
+    end else
+      `uvm_error("strategy_predictor", "Unknown command type received")
   endfunction : write_host
 
   function void write(avalon_seq_item_base t);
-    feed_message_item feed_item;
-    //if (!$cast(feed_item, t))
-    //  `uvm_fatal("strategy_predictor", "$cast failed to a feed_message_item")
-    //feed_item.msg_unpack();
-    
-    //Use the values stored in the mapper to see if a match exists.
-    // If it does, then send the order information to the scoreboard.
-    
-/* -----\/----- EXCLUDED -----\/-----
-    if (t.payload.size() != 17) begin
-      return;
-    end
-    strategy_trans_h = strategy_message_item::type_id::create("strategy_trans_h");
-    strategy_trans_h.payload = t.payload;
-    strategy_trans_h.msg_unpack();
-    if (strategy_trans_h.msg_type != "NEW") begin
-      return;
-    end
-    ap.write(strategy_trans_h);
- -----/\----- EXCLUDED -----/\----- */
+    host_order_t order;
+    order_item   out_order;
+    feed_message_item feed_item = feed_message_item::type_id::create("feed_item");
+    feed_item.payload = t.payload;
+    feed_item.msg_unpack();
+
+    if (feed_item.msg_type == "NEW") begin //Match the "New" message type
+      if (orders.exists(feed_item.symbol_id)) begin //Check if the symbol has been programmed
+        order = orders[feed_item.symbol_id];
+        if (feed_item.volume > order.min_vol &&
+            feed_item.volume < order.max_vol &&
+            feed_item.price > order.min_price &&
+            feed_item.price < order.max_price) begin
+          out_order = order_item::type_id::create("out_order");
+          out_order.data = order.order;
+          ap.write(out_order);
+        end else begin
+          discarded++;
+        end
+      end else begin // if (orders.exists(feed_item.symbol_id))
+        discarded++;
+      end // else: !if(orders.exists(feed_item.symbol_id))
+    end else begin // if (feed_item.msg_type == "NEW")
+      discarded++;
+    end // else: !if(feed_item.msg_type == "NEW")
+  endfunction
+
+  function void report_phase(uvm_phase phase);
+    `uvm_info(report_id,$sformatf("Discarded Messages:%0d", discarded),UVM_LOW)
   endfunction
 
 endclass

@@ -1,36 +1,57 @@
+## Common makefile across all testbenches
+##   Should be included at the top of all testbench-specific makefiles
+##   Defines common build targets for shared/reused packages
+##   Also defines a common run command to ensure homogeneous outupt (easier results collection)
+
+## Root directory of project from point-of-view of a testbench subdirectory
 export TICK2TRADE_ROOT_DIR ?= ../..
+
+## Default UVM test is "sanity_test" but can be overridden on command-line
 TESTNAME ?= sanity_test
+## Lock seed unless running a regression
 SEED ?= 0
+## Set DEBUG to 1 on command-line to invoke debugger; default is to run in command-line mode
 DEBUG ?= 0
+## Wavefile format for use in debugger
 WAVEFILE ?= wave.do
 
+## Simulator options depend on whether or not DEBUG is desired or not
 VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
 VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do $(WAVEFILE); run 0"
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
 
+## Delete all generated files
 clean:
 	rm -rf *.log *~ *.bak work transcript *.wlf design.bin qwave.db dut_lib pkg_lib feed_tb_work certe_dump.xml *.vstf *.vcd *_record.txt
 
+## Compile the RTL - a design.f file contains list of requisite files to compile. That file
+## leverages TICK2TRADE_ROOT_DIR which is why that variable is exported
 build_dut:
 	vlog -f $(TICK2TRADE_ROOT_DIR)/rtl/design.f
 
+## Avalon agent package
 build_avalon: 
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
 		$(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
 
+## Feed agent package (layered on top of avalon agent)
 build_feed: build_avalon build_symbol_map
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/feed/feed_agent_pkg.sv
 
+## Host interface package
 build_host:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_interface.sv \
 		$(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_agent_pkg.sv
 
+## Symbol mapper package
 build_symbol_map:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/extras/symbol_map_pkg.sv
 
+## Order message output agent
 build_order:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/order/order_interface.sv $(TICK2TRADE_ROOT_DIR)/sv/order/order_pkg.sv
 
+## Run target, common across all benches. Invokes simulator
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED)
 

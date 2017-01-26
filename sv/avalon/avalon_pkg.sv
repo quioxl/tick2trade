@@ -1,3 +1,5 @@
+// Avalon protocol package - see included file contents for more detail
+
 `include "uvm_macros.svh"
 package avalon_pkg;
   import uvm_pkg::*;

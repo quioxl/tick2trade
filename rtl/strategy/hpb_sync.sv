@@ -24,10 +24,13 @@ module hpb_sync (
 
   // Tied off now.  Put async in if time allows
   always_comb begin
+    //Input signals
     host_interface_synced.clk              = host_interface_in.clk;
     host_interface_synced.reset_n          = host_interface_in.reset_n;
     host_interface_synced.in_config_valid  = host_interface_in.in_config_valid;
     host_interface_synced.in_config_data   = host_interface_in.in_config_data;
-    host_interface_synced.in_config_accept = host_interface_in.in_config_accept;
+
+    //Output signals
+    host_interface_in.in_config_accept = host_interface_synced.in_config_accept;
   end
 endmodule // hpb_sync

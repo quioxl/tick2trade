@@ -35,9 +35,11 @@ module tb;
 
   // DUT Instantiation (Using default parameters)
   tts DUT (
-           .feed_if  (feed_if),
-           .host_if  (host_if)//,
-           //.order_if (order_if)
+           .clk                (clk),
+           .reset_n            (reset_n),
+           .feed_if            (feed_if),
+           .host_interface_in  (host_if),
+           .order_if           (order_if)
            );
 
   initial begin

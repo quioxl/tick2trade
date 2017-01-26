@@ -1,3 +1,5 @@
+// Random sequence - generates 100 random transactions and sends them
+// out on the chosen sequencer
 class avalon_random_seq extends avalon_seq_base;
 
     `uvm_object_utils(avalon_random_seq)

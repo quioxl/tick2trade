@@ -1,3 +1,5 @@
+// Slave mode Avalon driver component
+// Instantiated within the agent when configured to be ACTIVE SLAVE
 class avalon_slave_driver extends avalon_driver_base;
 
   `uvm_component_utils(avalon_slave_driver)
@@ -21,13 +23,16 @@ class avalon_slave_driver extends avalon_driver_base;
     vif.error <= 1'b0;
     forever begin
       @(posedge vif.clk);
-      if (vif.startofpacket == 1'b1) begin
+      if (vif.startofpacket === 1'b1) begin
         in_packet = 1;
       end
-      if (vif.endofpacket == 1'b1) begin
+      if (vif.endofpacket === 1'b1) begin
         in_packet = 0;
       end
-      if (in_packet == 1'b1 && vif.valid == 1'b1) begin
+      if (in_packet == 1'b1 && vif.valid === 1'b1) begin
+        // If we are inside of a packet and the valid bit is set, feel free to drop
+        // the ready signal.  Frequency is defined as a percentage (0-100)
+        // and once we decide to drop ready, hold it low for a random number of cycles
         randcase 
           cfg_h.slave_stall_frequency : begin
             vif.ready <= 1'b0;

@@ -1,13 +1,10 @@
+// Avalon master driver class
+//  Instantiated in the agent if configured as an ACTIVE MASTER.
+//  Transactional data is pulled from a connected sequencer and 
+//  sent out on the Avalon bus.
+
 class avalon_master_driver extends avalon_driver_base;
   `uvm_component_utils(avalon_master_driver)
-
-  // REQ full_payload [$];
-  // int full_payload_size;
-
-  // rand int next_accum_size;
-
-  // constraint accum_c { next_accum_size >= 1; 
-  //                      next_accum_size <= 1500; }
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -23,8 +20,7 @@ class avalon_master_driver extends avalon_driver_base;
     int bnum;
     int psize;
     bit [2:0] empty;
-    // if (!this.randomize())
-    //   `uvm_fatal("DRV","Self-randomization failed")
+    // Initialize the output signals to inactive state
     vif.data <= 'b0;
     vif.valid <= 'b0;
     vif.startofpacket <= 0;
@@ -33,24 +29,6 @@ class avalon_master_driver extends avalon_driver_base;
     vif.error <= 0;
     forever begin
       seq_item_port.get_next_item(trans_h);
-      // trans_h.msg_pack();
-      // if (trans_h.payload.size() + full_payload_size >= next_accum_size) begin
-      //   // The accumulated payload size has gotten big enough to send based on the random accumulated size.
-      //   // Build it up and send the data, re-randomize accumulation size.
-      //   build_and_send();
-      // end
-      // if (trans_h.payload.size() >= next_accum_size) begin
-      //   // The re-randomized accumulation size is small and the current message exceeds it.. Send this one too
-      //   full_payload.push_back(trans_h);
-      //   full_payload_size += trans_h.payload.size();
-      //   build_and_send();
-      // end else if ((trans_h.message_count > 0) && (trans_h.message_count <= full_payload.size())) begin
-      //   // The transaction has a non-zero message count and we're ready to send that many messages. Send what
-      //   // we've accumulated.
-      //   full_payload.push_back(trans_h);
-      //   full_payload_size += trans_h.payload.size();
-      //   build_and_send();
-      // end
       // Initialize the payload queue (64-bits wide)
       pdata = {};
       bnum = 8;
@@ -79,11 +57,11 @@ class avalon_master_driver extends avalon_driver_base;
       // Now drive the bus
       foreach (pdata[i]) begin
         // If target is not ready, advance clock until ready is high and drive valid low
-        if (vif.ready == 1'b0) begin
+        if (vif.ready !== 1'b1) begin
           do begin
             vif.valid <= 1'b0;
             @(posedge vif.clk);
-          end while (vif.ready == 1'b0);
+          end while (vif.ready !== 1'b1);
           // Once ready has gone high again, drive valid one additional cycle so the 
           // data that was put on the bus earlier can get picked up.
           vif.valid <= 1'b1;

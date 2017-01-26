@@ -38,8 +38,12 @@ module hpb
   // HDP Sync - Synchronizes Host IF to core clock
   //-----------------------------------------------------------------------------------
   hpb_sync hpb_sync_i (
-    host_interface_in         ( host_interface_in ),
-    host_interface_synced     ( host_interface_synced )
+                       .clk      (clk),
+                       .reset_n  (reset_n),
+                       .aclk     (aclk),
+                       .areset_n (areset_n),
+    .host_interface_in         ( host_interface_in ),
+    .host_interface_synced     ( host_interface_synced )
   );
 
   //-------------------------------------------------
@@ -48,7 +52,7 @@ module hpb
   always_ff @(posedge clk) begin
     if (!reset_n) begin
       host_msg_map <= '0;
-    end else if (in_config_valid) begin
+    end else if (host_interface_synced.in_config_valid) begin
       host_msg_map.cmd     <= host_interface_synced.in_config_data[CMD_B     +:CMD_NUM_BYTES*8];
       host_msg_map.ram     <= host_interface_synced.in_config_data[RAM_B     +:RAM_NUM_BYTES*8];
       host_msg_map.addr    <= host_interface_synced.in_config_data[ADDR_B    +:ADDR_NUM_BYTES*8];

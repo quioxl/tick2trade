@@ -34,7 +34,8 @@ module tts
   input                reset_n,            // Active low core reset
 
   avalon_if            feed_if,
-  host_interface       host_interface_in
+  host_interface       host_interface_in,
+  order_interface      order_if
 );
 
   // Symbol RCB RAM Interface
@@ -68,6 +69,9 @@ module tts
     // Clock/Reset
     .clk                ( clk               ),
     .reset_n            ( reset_n           ),
+           
+    .aclk               ( clk               ), //FIXME
+    .areset_n           ( reset_n           ), //FIXME
 
     .host_interface_in  ( host_interface_in ),
 
