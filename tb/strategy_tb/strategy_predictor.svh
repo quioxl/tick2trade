@@ -74,29 +74,36 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   function void write(avalon_seq_item_base t);
     host_order_t order;
     order_item   out_order;
-    feed_message_item feed_item = feed_message_item::type_id::create("feed_item");
-    feed_item.payload = t.payload;
-    feed_item.msg_unpack();
+    feed_message_item feed_item;
 
-    if (feed_item.msg_type == "NEW") begin //Match the "New" message type
-      if (orders.exists(feed_item.symbol_id)) begin //Check if the symbol has been programmed
-        order = orders[feed_item.symbol_id];
-        if (feed_item.volume > order.min_vol &&
-            feed_item.volume < order.max_vol &&
-            feed_item.price > order.min_price &&
-            feed_item.price < order.max_price) begin
-          out_order = order_item::type_id::create("out_order");
-          out_order.data = order.order;
-          ap.write(out_order);
-        end else begin
-          discarded++;
-        end
-      end else begin // if (orders.exists(feed_item.symbol_id))
-        discarded++;
-      end // else: !if(orders.exists(feed_item.symbol_id))
-    end else begin // if (feed_item.msg_type == "NEW")
+    if (t.payload.size() != 17) begin
+      //Currently, we only care about "NEW" messages of size 17 bytes
       discarded++;
-    end // else: !if(feed_item.msg_type == "NEW")
+    end else begin
+      //If we do have a message 17 bytes long, then lets see if it is nice message of "NEW"
+      feed_item = feed_message_item::type_id::create("feed_item");
+      feed_item.payload = t.payload;
+      feed_item.msg_unpack();
+      if (feed_item.msg_type == "NEW") begin //Match the "New" message type
+        if (orders.exists(feed_item.symbol_id)) begin //Check if the symbol has been programmed
+          order = orders[feed_item.symbol_id];
+          if (feed_item.volume > order.min_vol &&
+              feed_item.volume < order.max_vol &&
+              feed_item.price > order.min_price &&
+              feed_item.price < order.max_price) begin
+            out_order = order_item::type_id::create("out_order");
+            out_order.data = order.order;
+            ap.write(out_order);
+          end else begin
+            discarded++;
+          end
+        end else begin // if (orders.exists(feed_item.symbol_id))
+          discarded++;
+        end // else: !if(orders.exists(feed_item.symbol_id))
+      end else begin // if (feed_item.msg_type == "NEW")
+        discarded++;
+      end // else: !if(feed_item.msg_type == "NEW")
+    end // else: !if(t.payload.size() != 17)
   endfunction
 
   function void report_phase(uvm_phase phase);
