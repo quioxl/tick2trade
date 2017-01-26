@@ -58,7 +58,6 @@ add wave -noupdate -group SRCB_IF /tb/DUT/srcb_hpb_if/hpb_wr_req
 add wave -noupdate -group SRCB_IF /tb/DUT/srcb_hpb_if/rcb_wr_done
 add wave -noupdate -group SRCB_IF /tb/DUT/srcb_i/t2t_rd_addr
 add wave -noupdate -group SRCB_IF /tb/DUT/srcb_i/sef_read
-add wave -noupdate -group SRCB_IF /tb/DUT/srcb_i/sef_inmsg
 add wave -noupdate -group SRCB_IF /tb/DUT/srcb_i/rcb_data
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_hpb_if/clk
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_hpb_if/reset_n
@@ -71,12 +70,10 @@ add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/clk
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/reset_n
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/t2t_rd_addr
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/sef_read
-add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/sef_inmsg
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/rcb_data
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/ram_addr
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/accept_write_req
 add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/ignore_hpb_wr_req_q
-add wave -noupdate -expand -group PRCB_IF /tb/DUT/prcb_i/stall_host_write
 add wave -noupdate -group VRCB_IF /tb/DUT/vrcb_hpb_if/clk
 add wave -noupdate -group VRCB_IF /tb/DUT/vrcb_hpb_if/reset_n
 add wave -noupdate -group VRCB_IF /tb/DUT/vrcb_hpb_if/hpb_wr_addr
@@ -96,7 +93,7 @@ add wave -noupdate -group RAMS /tb/DUT/prcb_i/RAM
 add wave -noupdate -group RAMS /tb/DUT/vrcb_i/RAM
 add wave -noupdate -group RAMS /tb/DUT/orcb_i/RAM
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {205000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {32673 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 220
 configure wave -valuecolwidth 205
@@ -112,4 +109,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {165288 ps} {299093 ps}
+WaveRestoreZoom {0 ps} {133805 ps}
