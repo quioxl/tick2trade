@@ -19,6 +19,7 @@ class order_driver extends uvm_driver #(order_item);
   endfunction
 
   virtual task run_phase(uvm_phase phase);
+    vif.ready <= 1'b0;
     cfg_h.wait_for_reset();
     vif.ready <= 1'b1;
     forever begin
