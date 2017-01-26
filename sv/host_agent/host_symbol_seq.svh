@@ -17,6 +17,7 @@ class host_symbol_seq extends uvm_sequence #(host_item);
   //Constraints
   constraint volume_c { soft min_vol < max_vol; }
   constraint price_c  { soft min_price < max_price; }
+  constraint order_symbol_c {soft order[127:112] == symbol; }
 
   //Methods
   function new(string name = "host_symbol_seq");
