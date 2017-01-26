@@ -3,7 +3,7 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
   const string report_id = "STRATEGY_PREDICTOR";
 
-  int          discarded = 0;
+  int          discarded[string];
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -78,7 +78,7 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
     if (t.payload.size() != 17) begin
       //Currently, we only care about "NEW" messages of size 17 bytes
-      discarded++;
+      discarded["size"]++;
     end else begin
       //If we do have a message 17 bytes long, then lets see if it is nice message of "NEW"
       feed_item = feed_message_item::type_id::create("feed_item");
@@ -95,19 +95,20 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
             out_order.data = order.order;
             ap.write(out_order);
           end else begin
-            discarded++;
+            discarded["price_volume"]++;
           end
         end else begin // if (orders.exists(feed_item.symbol_id))
-          discarded++;
+          discarded["no_symbol"]++;
         end // else: !if(orders.exists(feed_item.symbol_id))
       end else begin // if (feed_item.msg_type == "NEW")
-        discarded++;
+        discarded["bad_type"]++;
       end // else: !if(feed_item.msg_type == "NEW")
     end // else: !if(t.payload.size() != 17)
   endfunction
 
   function void report_phase(uvm_phase phase);
-    `uvm_info(report_id,$sformatf("Discarded Messages:%0d", discarded),UVM_LOW)
+    `uvm_info(report_id, $sformatf("Total Discarded Messages: %0d", discarded.sum()), UVM_LOW)
+    `uvm_info(report_id, $sformatf("%p", discarded), UVM_LOW)
   endfunction
 
 endclass
