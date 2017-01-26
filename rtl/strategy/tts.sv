@@ -35,7 +35,7 @@ module tts
   input                reset_n,            // Active low core reset
 
   avalon_if            dec_if,
-  host_interface       host_interface_in,
+  host_interface       host_if,
   order_interface      order_if
 );
 
@@ -67,7 +67,7 @@ module tts
     wire         sef_pcmp_load_a, sef_pcmp_load_b, sef_vcmp_load_a, sef_vcmp_load_b;
     wire         sef_out_valid;   
     wire         pcmp_pass, vcmp_pass;
-  
+
     wire [63 :0] srcb_data, vrcb_data;
     wire [127:0] prcb_data, orcb_data;
 
@@ -86,7 +86,7 @@ module tts
     .aclk               ( clk               ), //FIXME
     .areset_n           ( reset_n           ), //FIXME
 
-    .host_interface_in  ( host_interface_in ),
+    .host_if            ( host_if           ),
 
     .srcb_hpb_if        ( srcb_hpb_if       ),
     .prcb_hpb_if        ( prcb_hpb_if       ),
@@ -102,24 +102,24 @@ module tts
     // Clk/Reset
     .clk               (clk),
     .reset_n           (reset_n),
-   
+
     // Feed Decoder IF
     .dec_if            (dec_if),
-   
+
     // Symbol ID RCB
     .sef_rd_srcb       (sef_rd_srcb),
     .tts_sym_vld       (tts_sym_vld),
-   
+
     // Price Path (RCB & CMP)
     .sef_rd_prcb       (sef_rd_prcb),
     .sef_pcmp_load_a   (sef_pcmp_load_a),
     .sef_pcmp_load_b   (sef_pcmp_load_b),
-   
+
     // Volume Path (RCB & CMP)
     .sef_rd_vrcb       (sef_rd_vrcb),
     .sef_vcmp_load_a   (sef_vcmp_load_a),
     .sef_vcmp_load_b   (sef_vcmp_load_b),
-   
+
     // Order RCB
     .sef_rd_orcb       (sef_rd_orcb),
     .sef_out_valid     (sef_out_valid)
@@ -151,7 +151,7 @@ module tts
 
   );
 
-  // Since the Symbol RCB is a library component, a little bit of 
+  // Since the Symbol RCB is a library component, a little bit of
   // muxing needs to be done in the wrapper to extract the correct address
   // if this produces a bad timing path, the sRCB could be customized
   // and the byte muxing done prior to the register

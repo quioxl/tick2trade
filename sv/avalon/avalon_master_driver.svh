@@ -58,10 +58,7 @@ class avalon_master_driver extends avalon_driver_base;
       foreach (pdata[i]) begin
         // If target is not ready, advance clock until ready is high and drive valid low
         if (vif.ready !== 1'b1) begin
-          do begin
-            vif.valid <= 1'b0;
-            @(posedge vif.clk);
-          end while (vif.ready !== 1'b1);
+          wait_for_ready();
           // Once ready has gone high again, drive valid one additional cycle so the 
           // data that was put on the bus earlier can get picked up.
           vif.valid <= 1'b1;
@@ -97,6 +94,26 @@ class avalon_master_driver extends avalon_driver_base;
       end
       seq_item_port.item_done();
     end
+  endtask
+
+  virtual task wait_for_ready();
+    bit done = 0;
+    int count = 0;
+    fork
+      begin : TIMEOUT_BLOCK
+        repeat (cfg_h.timeout) begin
+          @(posedge vif.clk);
+        end
+        `uvm_fatal("DRV","Timeout waiting for ready, exiting")
+      end
+      begin : WAIT_BLOCK
+        do begin
+          vif.valid <= 1'b0;
+          @(posedge vif.clk);
+        end while (vif.ready !== 1'b1);
+        disable TIMEOUT_BLOCK;
+      end
+    join
   endtask
 
 endclass

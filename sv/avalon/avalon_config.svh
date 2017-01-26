@@ -6,6 +6,9 @@ class avalon_config extends uvm_object;
   // Virtual interface associated with a specific instantiation of the avalon agent
   virtual avalon_if vif;
 
+  // Timeout value (measured in clock cycles) to be used across this agent
+  int timeout = 200;
+
   // If active, a driver/sequencer pair will be included with the agent.  Otherwise we'll just
   // get a monitor
   uvm_active_passive_enum active = UVM_ACTIVE;
