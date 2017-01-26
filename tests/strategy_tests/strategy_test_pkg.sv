@@ -10,5 +10,5 @@ package strategy_test_pkg;
 
   `include "strategy_test_base.svh"
   `include "sanity_test.svh"
-  //`include "strategy_random_test.svh"
+  `include "basic_test.svh"
 endpackage

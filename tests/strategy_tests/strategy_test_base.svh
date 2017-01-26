@@ -19,20 +19,13 @@ class strategy_test_base extends uvm_test;
       `uvm_fatal("TEST","Unable to find host_if entry in config db")
     if (!uvm_config_db #(virtual order_interface)::get(this,"","order_if",cfg_h.order_cfg_h.vif))
       `uvm_fatal("TEST","Unable to find order_if entry in config db")
-  endfunction
-
-/* -----\/----- EXCLUDED -----\/-----
-  virtual function void connect_phase(uvm_phase phase);
-    super.connect_phase(phase);
-    seqr_h = env_h.layering_h.strategy_message_seqr_h;
-  endfunction
- -----/\----- EXCLUDED -----/\----- */
+  endfunction : build_phase
 
   virtual task run_phase(uvm_phase phase);
     super.run_phase(phase);
     phase.raise_objection(this);
     cfg_h.wait_for_reset();
     cfg_h.wait_for_clocks(10);
-  endtask
+  endtask : run_phase
 
 endclass

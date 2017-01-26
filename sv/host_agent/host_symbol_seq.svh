@@ -94,7 +94,7 @@ class host_symbol_seq extends uvm_sequence #(host_item);
                           bit [63:0]    min_pric,
                           bit [63:0]    max_pric,
                           bit [127:0]   the_order,
-                          uvm_sequencer #(host_item) seqr,
+                          uvm_sequencer_base seqr,
                           bit           update = 0);
     //Store the values
     symbol     = sym;
