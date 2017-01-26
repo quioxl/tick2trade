@@ -119,6 +119,7 @@ module feed_decoder #(
     logic     [C_MSG_LEN_MAX_WIDTH:0] len_rem;
     logic     [C_PKT_EMPTY_WIDTH-1:0] off;
     logic     [C_PKT_EMPTY_WIDTH-1:0] nxt_off;
+    logic     [C_PKT_EMPTY_WIDTH-1:0] nxt_len_off;
     logic     [C_PKT_EMPTY_WIDTH-1:0] emt;
   } t_msg_state;
   // -----------------------------------------------------------------------}}}
@@ -129,6 +130,7 @@ module feed_decoder #(
   t_pkt                           msg;
   t_msg_state                     msg_state;
   logic  [C_PKT_DATA_WIDTH*2-1:0] pkt1_pkt0_dat;
+  
   // -----------------------------------------------------------------------}}}
   // IN Ready {{{
 //  always_ff @(posedge clk) begin
@@ -146,7 +148,8 @@ module feed_decoder #(
       shift0_en <= out_ready;
     end
   end
-  assign shift1_en = shift0_en || ~pkt[1].vld;
+  assign shift1_en = shift0_en & 
+                     (~pkt[1].vld | pkt[0].vld);
   // -----------------------------------------------------------------------}}}
   // Input Packet: Input Registers [Stage 0] {{{
   always_ff @(posedge clk) begin
@@ -185,16 +188,34 @@ module feed_decoder #(
   always_ff @(posedge clk) begin
     if (!reset_n) begin
       msg_state <= '0;
-    end else if (pkt[0].vld) begin
-      if (pkt[0].sop) begin
-        msg_state.active  <= 1'b1;
-        msg_state.sop     <= 1'b1;
-        msg_state.eop     <= 1'b0;
-        msg_state.cnt     <= pkt[0].dat[C_MSG_CNT_LSB+:C_MSG_CNT_MAX_WIDTH];
-        msg_state.len     <= pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH];
+    end else if (shift0_en && pkt[0].vld) begin
+      msg_state.active    <= pkt[0].sop |
+                             (msg_state.active & ~pkt[0].eop);
+      msg_state.sop       <= pkt[0].sop |
+                             (msg_state.active & msg_state.eop);
+      msg_state.eop       <= msg_state.active & msg_state.len_rem[C_MSG_LEN_MAX_WIDTH];
+      if (~msg_state.active || pkt[0].eop) begin
+        msg_state.nxt_off     <= C_MSG_CNT_BYTES+C_MSG_LEN_BYTES+1;
+        msg_state.nxt_len_off <= C_MSG_CNT_BYTES+1;
+      end else if (msg_state.sop) begin
+        msg_state.nxt_off     <= msg_state.nxt_off+msg_state.len+C_MSG_LEN_BYTES; 
+        msg_state.nxt_len_off <= msg_state.nxt_len_off+msg_state.len+C_MSG_LEN_BYTES;
+      end
+      if (pkt[0].sop || msg_state.sop) begin
+        msg_state.off         <= msg_state.nxt_off;
+      end
+      if (pkt[0].sop || (msg_state.active && msg_state.eop)) begin
+        msg_state.len         <=  pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH];
+      end
+
+      // GOT UP TO HERE, stuff below not right
+
+
+      if (~msg_state.active || msg_state.eop) begin
+        msg_state.len   <= pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH];
+
         // The counters below count down to -1, which is why there is the extra
         // value subtracted initially
-        msg_state.cnt_nxt <= {1'b0,pkt[0].dat[C_MSG_CNT_LSB+:C_MSG_CNT_MAX_WIDTH]}-2;
         msg_state.len_rem <= {1'b0,pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_MSG_LEN_MAX_WIDTH]}-
                              C_PKT_BEAT_BYTES-1;
         msg_state.off     <= C_MSG_CNT_BYTES+
@@ -203,6 +224,15 @@ module feed_decoder #(
                              pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_PKT_EMPTY_WIDTH] +
                              C_MSG_LEN_BYTES;
         msg_state.emt     <= (~pkt[0].dat[C_MSG_LEN_INIT_LSB+:C_PKT_EMPTY_WIDTH])+1'b1;
+      end
+
+      if (pkt[0].sop) begin
+        msg_state.cnt     <= pkt[0].dat[C_MSG_CNT_LSB+:C_MSG_CNT_MAX_WIDTH];
+      end
+      if (pkt[0].sop) begin
+        msg_state.cnt_nxt <= {1'b0,pkt[0].dat[C_MSG_CNT_LSB+:C_MSG_CNT_MAX_WIDTH]}-2;
+      end else if (msg_state.sop) begin
+        msg_state.cnt_nxt <= msg_state.cnt_nxt - 1;
       end
     end
   end
@@ -229,6 +259,7 @@ module feed_decoder #(
   assign out_startofpacket = msg.sop;
   assign out_endofpacket   = msg.eop;
   assign out_empty         = msg.emt;
+  assign out_error         = msg.err;
   assign out_data          = msg.dat;
   // -----------------------------------------------------------------------}}}
 endmodule
