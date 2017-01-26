@@ -2,22 +2,22 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /tb/reset_n
 add wave -noupdate /tb/clk
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/data
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/empty
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/endofpacket
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/error
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/ready
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/startofpacket
-add wave -noupdate -group {Avalon Master} /tb/avl_master_if/valid
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/data
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/empty
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/endofpacket
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/error
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/ready
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/startofpacket
-add wave -noupdate -group {Avalon Slave} /tb/avl_slave_if/valid
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/data
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/empty
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/endofpacket
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/error
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/ready
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/startofpacket
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/valid
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/data
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/empty
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/endofpacket
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/error
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/ready
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/startofpacket
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/valid
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {193 ns} 0}
+WaveRestoreCursors {{Cursor 1} {193000 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 500
 configure wave -valuecolwidth 100
@@ -33,4 +33,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits fs
 update
-WaveRestoreZoom {0 ns} {4667 ns}
+WaveRestoreZoom {39244 ps} {407959 ps}

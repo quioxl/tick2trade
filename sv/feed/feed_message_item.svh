@@ -46,6 +46,10 @@ class feed_message_item extends avalon_seq_item_base;
     volume = rhs_.volume;
   endfunction
 
+  function void post_randomize();
+    msg_pack();
+  endfunction
+
   virtual function void msg_pack();
     payload = new[17];
     payload[0] = msg_type[23:16];

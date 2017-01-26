@@ -5,6 +5,7 @@ package avalon_pkg;
   import uvm_pkg::*;
   typedef enum { AVL_MASTER, AVL_SLAVE } avalon_master_slave_enum;
   `include "avalon_seq_item_base.svh"
+  `include "avalon_message_item.svh"
   `include "avalon_config.svh"
   `include "avalon_driver_base.svh"
   `include "avalon_master_driver.svh"

@@ -10,18 +10,14 @@ class feed_random_seq extends uvm_sequence #(avalon_seq_item_base);
 
   task body();
     feed_message_item feed_trans_h;
-    avalon_seq_item_base avalon_trans_h, copy_h;
     feed_trans_h = feed_message_item::type_id::create("feed_trans_h");
-    avalon_trans_h = avalon_seq_item_base::type_id::create("avalon_trans_h");
     repeat (trans_count) begin
-      start_item(avalon_trans_h);
+      start_item(feed_trans_h);
       if (!feed_trans_h.randomize()) begin
         `uvm_fatal("SEQ","Transaction randomization failed")
       end
       `uvm_info("SEQ",$sformatf("Sending feed message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
-      feed_trans_h.msg_pack();
-      avalon_trans_h.copy(feed_trans_h);
-      finish_item(avalon_trans_h);
+      finish_item(feed_trans_h);
     end
   endtask
 
