@@ -23,7 +23,9 @@ VSIM_COVERAGE = $(VSIM_COVERAGE_$(COVERAGE))
 
 ## Simulator options depend on whether or not DEBUG is desired or not
 VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
-VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do $(WAVEFILE); run 0" -assertdebug
+VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg \
+  -do "set WildcardFilter [lsearch -not -all -inline $WildcardFilter Assertion]; \
+    log -r /*; do $(WAVEFILE); run 0" -assertdebug
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
 
 ## Delete all generated files
@@ -62,5 +64,6 @@ build_order:
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED) $(VSIM_COVERAGE) -l $(TESTNAME).log
 
+## Generate a UCDB (coverage database) for any simulations that have been run so far
 ucdb:
 	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log

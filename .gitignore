@@ -19,3 +19,4 @@ certe_dump.xml
 *debuglog.txt
 *.vcd
 *_record.txt
+coverage
