@@ -33,24 +33,26 @@
 
 import tts_pkg::*;
 
-interface hpb_bind #(
-  parameter HPB_DATA_WIDTH = 128,
-  parameter HPB_ASYNC_HOST = 0
+interface rcb_bind #(
+  parameter RCB_RAM_ADDR_WIDTH = 128,
+  parameter RCB_RAM_WIDTH = 0
 ) (
    input                      clk,
    input                      reset_n,
-   input    t_host_msg_map    host_msg_map,
-   host_interface             host_interface_synced
+   input                      sef_read,
+   input                      accept_write_req,
+   input                      ignore_hpb_wr_req_q,
+   hpb_if                     hpb_if_i
 );
 
-  reg config_vld_q;
+  reg wr_req_q;
 
   // get registered version of config valid because host_msg_map is registered
   always_ff @(posedge clk) begin
     if (!reset_n) begin
-      config_vld_q <= 1'b0;
+      wr_req_q <= 1'b0;
     end else begin
-      config_vld_q <= host_interface_synced.in_config_valid;
+      wr_req_q <= hpb_if_i.hpb_wr_req;
     end
 
   end
@@ -58,54 +60,43 @@ interface hpb_bind #(
   //------------------------------------------------------------------------------------
   // Assertions
   //------------------------------------------------------------------------------------
-  `assert_prop_default(assert_invld_byte_en_PRICE,
-                      ((host_msg_map.ram == 8'h2 ) |-> (host_msg_map.byte_en == 24'h00_FFFF)),
-                      "Invalid BYTE_EN when targeting Price RCB")
+  `assert_prop_default(assert_hpb_wr_done,
+                      (hpb_if_i.hpb_wr_req |-> !$isunknown(hpb_if_i.hpb_wr_addr)),
+                      "WR Address unknown when wr_request is asserted")
 
-  `assert_prop_default(assert_invld_byte_en_VOLUME,
-                      ((host_msg_map.ram == 8'h4 ) |-> (host_msg_map.byte_en == 24'h00_00FF)),
-                      "Invalid BYTE_EN when targeting Volume RCB")
-
-  `assert_prop_default(assert_invld_byte_en_ORDER,
-                      ((host_msg_map.ram == 8'h8 ) |-> (host_msg_map.byte_en == 24'h00_FFFF)),
-                      "Invalid BYTE_EN when targeting Order RCB")
-
-  `assert_prop_default(assert_invld_cmd,
-                      ((config_vld_q == 1'b1) |-> host_msg_map.cmd == 8'h2),
-                      "Host Command != 2 (LOAD) when config valid is high")
+  `assert_prop_default(assert_ignore_deassert,
+                      (hpb_if_i.hpb_wr_req |-> ##1 !hpb_if_i.hpb_wr_req |-> ##1 !ignore_hpb_wr_req_q),
+                      "Ignore did not de-assert after WR Request de-asserted")
 
   //------------------------------------------------------------------------------------
   // Embedded coverage
   //------------------------------------------------------------------------------------
-  covergroup cg_hpb @(posedge clk);
+  covergroup cg_rcb @(posedge clk);
 
-    // TITLE: Cover all states have been hit
-    cp_msg_cmd: coverpoint host_msg_map.cmd iff (reset_n) {
-      bins LOAD       = {8'h2 };
+    // TITLE: Cover all collision scenarios have been hit
+    cp_rcb_collision_scenarios: coverpoint {sef_read, hpb_if_i.hpb_wr_req} iff (reset_n) {
+      bins WRITE_ONLY    = { 2'b01 };
+      bins READ_ONLY     = { 2'b10 };
+      bins COLLISION_HIT = { 2'b11 };
     }
 
-    // TITLE: Cover all states have been hit
-    cp_msg_ram: coverpoint host_msg_map.ram iff (reset_n) {
-      bins PRICE      = {8'h2 };
-      bins VOLUME     = {8'h4 };
-      bins ORDER      = {8'h8 };
-      bins SYMBOL     = {8'h1 };
+    cp_width_param: coverpoint RCB_RAM_WIDTH iff (reset_n) {
+      bins W_64      = { 64 } ;
+      bins W_128     = { 128 };
     }
 
-    cp_async_param: coverpoint HPB_ASYNC_HOST iff (reset_n) {
-      bins SYNC      = { 0 } ;
-      bins ASYNC     = { 1 };
-    }
+   endgroup: cg_rcb
+   cg_rcb ccg_rcb_inst=new;
 
-   endgroup: cg_hpb
-   cg_hpb cg_hpb_inst=new;
 
+  `cover_prop_default(wr_during_ignore,
+              ( hpb_if_i.hpb_wr_req |-> ignore_hpb_wr_req_q))
 
   initial begin
-    $display("INFO: hpb_bind file loaded");
+    $display("INFO: rcb_bind file loaded");
   end
 
-endinterface : hpb_bind
+endinterface : rcb_bind
 
 // Bind it
-bind hpb hpb_bind #(HPB_DATA_WIDTH, HPB_ASYNC_HOST) hpb_bound (.*);
+bind rcb rcb_bind #(RCB_RAM_ADDR_WIDTH, RCB_RAM_WIDTH) rcb_bound (.*);

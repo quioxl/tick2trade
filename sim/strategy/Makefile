@@ -7,7 +7,8 @@ BINDS_VLOG_1 = vlog +define+SIM_ONLY -cuname binds -mfcu \
                     $(TICK2TRADE_ROOT_DIR)/rtl/binds/avalon_if_bind.sv \
                     $(TICK2TRADE_ROOT_DIR)/rtl/binds/host_interface_bind.sv \
                     $(TICK2TRADE_ROOT_DIR)/rtl/binds/hpb_if_bind.sv \
-                    $(TICK2TRADE_ROOT_DIR)/rtl/binds/hpb_bind.sv
+                    $(TICK2TRADE_ROOT_DIR)/rtl/binds/hpb_bind.sv \
+                    $(TICK2TRADE_ROOT_DIR)/rtl/binds/rcb_bind.sv
 BINDS_VLOG   = $(BINDS_VLOG_$(USE_BINDS))
 
 BINDS_TOP_0 =
