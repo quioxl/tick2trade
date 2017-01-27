@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 //
 //  Description: Strategy Execution FSM (SEF) is responsible for controlling
-//               RAM reads, loading comparators and rubber stamping the 
+//               RAM reads, loading comparators and rubber stamping the
 //               outgoing order.
 //
 // ---------------------------------------------------------------------------
@@ -39,12 +39,6 @@ module sef
   output bit     sef_out_valid
 );
 
-  typedef enum {
-    WAIT,
-    LD,
-    CMP
-  } t_sef_st;
-
   t_sef_st  state;
 
   bit       new_msg;
@@ -71,7 +65,7 @@ module sef
     else begin
       case (state)
         WAIT    : begin
-                  if (new_msg)           state <= LD;    
+                  if (new_msg)           state <= LD;
                   else                   state <= WAIT;
                   end
         LD      : begin
@@ -84,7 +78,7 @@ module sef
                   else                   state <= CMP;
                   end
         default :                        state <= WAIT;
-      endcase       
+      endcase
     end
   end
 

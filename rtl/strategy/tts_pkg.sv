@@ -30,6 +30,12 @@ package tts_pkg;
     ORCB = 8'd8              // Order RCB
   } t_RAM_ENCODING;
 
+  typedef enum {
+    WAIT,
+    LD,
+    CMP
+  } t_sef_st;
+
   typedef struct packed {
     logic         [CMD_NUM_BYTES*8-1:0] cmd;
     logic         [RAM_NUM_BYTES*8-1:0] ram;

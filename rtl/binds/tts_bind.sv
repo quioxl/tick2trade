@@ -33,58 +33,50 @@
 
 import tts_pkg::*;
 
-interface rcb_bind #(
-  parameter RCB_RAM_ADDR_WIDTH = 128,
-  parameter RCB_RAM_WIDTH = 0
-) (
-   input                      clk,
-   input                      reset_n,
-   input                      sef_read,
-   input                      ignore_hpb_wr_req_q,
-   hpb_if                     hpb_if_i
+interface tts_bind (
+   input             clk,
+   input             reset_n,
+   input      [2:0]  sym_idx,
+   input             sef_out_valid,
+   input             vcmp_pass,
+   input             pcmp_pass
+
+
 );
 
 
   //------------------------------------------------------------------------------------
   // Assertions
   //------------------------------------------------------------------------------------
-  `assert_prop_default(assert_hpb_wr_done,
-                      (hpb_if_i.hpb_wr_req |-> !$isunknown(hpb_if_i.hpb_wr_addr)),
-                      "WR Address unknown when wr_request is asserted")
 
-  `assert_prop_default(assert_ignore_deassert,
-                      (hpb_if_i.hpb_wr_req |-> ##1 !hpb_if_i.hpb_wr_req |-> ##1 !ignore_hpb_wr_req_q),
-                      "Ignore did not de-assert after WR Request de-asserted")
 
   //------------------------------------------------------------------------------------
   // Embedded coverage
   //------------------------------------------------------------------------------------
-  covergroup cg_rcb @(posedge clk);
+  covergroup cg_tts @(posedge clk);
 
-    // TITLE: Cover all collision scenarios have been hit
-    cp_rcb_collision_scenarios: coverpoint {sef_read, hpb_if_i.hpb_wr_req} iff (reset_n) {
-      bins WRITE_ONLY    = { 2'b01 };
-      bins READ_ONLY     = { 2'b10 };
-      bins COLLISION_HIT = { 2'b11 };
+    cp_sym_idx: coverpoint sym_idx iff (reset_n) {
+      bins IDX_ZERO    = { 2'b00 };
+      bins IDX_ONE     = { 2'b01 };
+      bins IDX_TWO     = { 2'b10 };
+      bins IDX_THREE   = { 2'b11 };
     }
 
-    cp_width_param: coverpoint RCB_RAM_WIDTH iff (reset_n) {
-      bins W_64      = { 64 } ;
-      bins W_128     = { 128 };
+    cp_cmp_results: coverpoint {vcmp_pass, pcmp_pass} iff (reset_n && sef_out_valid) {
+      bins BOTH_MISCOMP  = { 2'b00 };
+      bins PCMP_ONLY     = { 2'b01 };
+      bins VCMP_ONLY     = { 2'b10 };
+      bins BOTH_CMP_OK   = { 2'b11 };
     }
 
-   endgroup: cg_rcb
-   cg_rcb cg_rcb_inst=new;
-
-
-  `cover_prop_default(wr_during_ignore,
-              ( hpb_if_i.hpb_wr_req |-> ignore_hpb_wr_req_q))
+   endgroup: cg_tts
+   cg_tts cg_tts_inst=new;
 
   initial begin
-    $display("INFO: rcb_bind file loaded");
+    $display("INFO: tts_bind file loaded");
   end
 
-endinterface : rcb_bind
+endinterface : tts_bind
 
 // Bind it
-bind rcb rcb_bind #(RCB_RAM_ADDR_WIDTH, RCB_RAM_WIDTH) rcb_bound (.*);
+bind tts tts_bind tts_bound (.*);

@@ -33,58 +33,49 @@
 
 import tts_pkg::*;
 
-interface rcb_bind #(
-  parameter RCB_RAM_ADDR_WIDTH = 128,
-  parameter RCB_RAM_WIDTH = 0
-) (
+interface sef_bind (
    input                      clk,
    input                      reset_n,
-   input                      sef_read,
-   input                      ignore_hpb_wr_req_q,
-   hpb_if                     hpb_if_i
+   input   t_sef_st           state,
+   avalon_if                  dec_if
 );
 
 
   //------------------------------------------------------------------------------------
   // Assertions
   //------------------------------------------------------------------------------------
-  `assert_prop_default(assert_hpb_wr_done,
-                      (hpb_if_i.hpb_wr_req |-> !$isunknown(hpb_if_i.hpb_wr_addr)),
-                      "WR Address unknown when wr_request is asserted")
-
-  `assert_prop_default(assert_ignore_deassert,
-                      (hpb_if_i.hpb_wr_req |-> ##1 !hpb_if_i.hpb_wr_req |-> ##1 !ignore_hpb_wr_req_q),
-                      "Ignore did not de-assert after WR Request de-asserted")
+//  `assert_prop_default(assert_hpb_wr_done,
+//                      (hpb_if_i.hpb_wr_req |-> !$isunknown(hpb_if_i.hpb_wr_addr)),
+//                      "WR Address unknown when wr_request is asserted")
+//
+//  `assert_prop_default(assert_ignore_deassert,
+//                      (hpb_if_i.hpb_wr_req |-> ##1 !hpb_if_i.hpb_wr_req |-> ##1 !ignore_hpb_wr_req_q),
+//                      "Ignore did not de-assert after WR Request de-asserted")
 
   //------------------------------------------------------------------------------------
   // Embedded coverage
   //------------------------------------------------------------------------------------
-  covergroup cg_rcb @(posedge clk);
+  covergroup cg_sef @(posedge clk);
 
     // TITLE: Cover all collision scenarios have been hit
-    cp_rcb_collision_scenarios: coverpoint {sef_read, hpb_if_i.hpb_wr_req} iff (reset_n) {
-      bins WRITE_ONLY    = { 2'b01 };
-      bins READ_ONLY     = { 2'b10 };
-      bins COLLISION_HIT = { 2'b11 };
+    cp_sef_state: coverpoint state iff (reset_n) {
+      bins WAIT   = { tts_pkg::WAIT };
+      bins LD     = { tts_pkg::LD   };
+      bins CMP    = { tts_pkg::CMP  };
     }
 
-    cp_width_param: coverpoint RCB_RAM_WIDTH iff (reset_n) {
-      bins W_64      = { 64 } ;
-      bins W_128     = { 128 };
-    }
-
-   endgroup: cg_rcb
-   cg_rcb cg_rcb_inst=new;
+   endgroup: cg_sef
+   cg_sef cg_sef_inst=new;
 
 
-  `cover_prop_default(wr_during_ignore,
-              ( hpb_if_i.hpb_wr_req |-> ignore_hpb_wr_req_q))
+//  `cover_prop_default(wr_during_ignore,
+//              ( hpb_if_i.hpb_wr_req |-> ignore_hpb_wr_req_q))
 
   initial begin
-    $display("INFO: rcb_bind file loaded");
+    $display("INFO: sef_bind file loaded");
   end
 
-endinterface : rcb_bind
+endinterface : sef_bind
 
 // Bind it
-bind rcb rcb_bind #(RCB_RAM_ADDR_WIDTH, RCB_RAM_WIDTH) rcb_bound (.*);
+bind sef sef_bind sef_bound (.*);
