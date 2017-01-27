@@ -22,9 +22,9 @@ class new_order_generator extends uvm_subscriber #(order_item);
     //Find the symbol
     symbol_t symbol = t.data[127:112];
     //Create new symbol entry
+    symbol_seq_h.sym_update = 1;
     if (!symbol_seq_h.randomize() with
-          {symbol == local::symbol;
-           sym_update == 1; }) begin
+          {symbol == local::symbol; }) begin
       `uvm_fatal("SEQ","Sequence randomization failed")
     end
     fork //Must fork/join_none becuase write() is a function

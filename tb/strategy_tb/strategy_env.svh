@@ -50,8 +50,11 @@ class strategy_env extends uvm_env;
     predictor_h.ap.connect(scoreboard_h.expect_ai);
     order_agent_h.ap.connect(scoreboard_h.actual_ai);
 
-    if (cfg_h.enable_new_order_gen)
+    if (cfg_h.enable_new_order_gen) begin
       new_order_gen_h.host_seqr_h = host_agent_h.seqr_h;
+      order_agent_h.ap.connect(new_order_gen_h.analysis_export);
+    end
+    
   endfunction
 
 endclass
