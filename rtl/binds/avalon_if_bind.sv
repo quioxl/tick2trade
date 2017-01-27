@@ -57,10 +57,12 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
     if (!reset_n) begin
       in_pkt <= 1'b0;
     end else begin
-      if (startofpacket) begin
-         in_pkt <= 1'b1;
-      end else if (in_pkt && endofpacket) begin
-        in_pkt <= 1'b0;
+      if (valid && ready) begin
+        if (startofpacket && !endofpacket) begin
+          in_pkt <= 1'b1;
+        end else if (in_pkt && endofpacket) begin
+          in_pkt <= 1'b0;
+        end
       end
     end
   end
@@ -115,7 +117,7 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
                       "Valid did not de-assert the clock after read de-asserted")
 
   `assert_prop_default(invalid_eop,
-                      (endofpacket |->  in_pkt),
+                      ((endofpacket && valid) |->  (in_pkt || startofpacket)),
                       "EOP asserted while not in packet")
 
   //------------------------------------------------------------------------------------
@@ -147,6 +149,9 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
 
   `cover_prop_default(b2b_beats,
               ( ready && valid |-> ##1 ready && valid))
+
+  `cover_prop_default(single_cycle_pkt,
+              (startofpacket && endofpacket && ready && valid))
 
   `cover_prop_default(min_pkt_size,
               ( startofpacket |-> ##1 endofpacket))
