@@ -21,6 +21,12 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
     super.build_phase(phase);
     host_export = new("host_export",this);
     ap = new("ap",this);
+    //Initialize discarded values to 0.  Not strickly required, but
+    // removes warnings
+    discarded["size"] = 0;
+    discarded["price_volume"] = 0;
+    discarded["no_symbol"] = 0;
+    discarded["bad_type"] = 0;
   endfunction : build_phase
   
   function void write_host(host_item t);
