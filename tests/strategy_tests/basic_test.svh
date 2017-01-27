@@ -9,6 +9,7 @@ class basic_test extends strategy_test_base;
     super.build_phase(phase);
     //Turn off the new order generator to prevent the RAM from changing
     cfg_h.enable_new_order_gen = 0;
+    cfg_h.order_cfg_h.stall_frequency = 0;
   endfunction : build_phase
 
   virtual task run_phase(uvm_phase phase);
