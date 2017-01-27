@@ -19,29 +19,27 @@
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
-module hpb_if_bind
-#(
-  parameter RCB_RAM_WIDTH  = 64
-) (
+interface hpb_if_bind #( parameter RCB_RAM_ADDR_WIDTH = 14,
+                         parameter RCB_RAM_WIDTH = 64) (
  input                              clk,
  input                              reset_n,
- input                              hpb_wr_addr,
+ input [(RCB_RAM_ADDR_WIDTH-1):0]   hpb_wr_addr,
  input       [(RCB_RAM_WIDTH-1):0]  hpb_wr_data,
- input   [log2(RCB_RAM_WIDTH)-1:0]  hpb_wr_en,
+ input       [RCB_RAM_WIDTH/8-1:0]  hpb_wr_byte_en,
  input                              hpb_wr_req,
  input                              rcb_wr_done
 
 );
 
   `assert_prop_default(assert_invalid_we,
-                      (hpb_wr_req |-> (hpb_wr_en != 'h0)),
+                      (hpb_wr_req |-> (hpb_wr_byte_en != 'h0)),
                       "Write Request asserted without any write enables")
 
   initial begin
     $display("INFO: hpb_if_bind file loaded");
   end
 
-endmodule // hpb_if_bind
+endinterface : hpb_if_bind
 
 // Bind it
-bind hpb_if hpb_if_bind  hpb_if_bound (.*);
+bind hpb_if hpb_if_bind #(RCB_RAM_ADDR_WIDTH, RCB_RAM_WIDTH) hpb_if_bound (.*);
