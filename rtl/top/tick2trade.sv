@@ -13,8 +13,6 @@ module tick2trade #(
   parameter C_MSG_LEN_BYTES       = 2,
   parameter C_MSG_MIN_BYTES       = 8,
   parameter C_MSG_MAX_BYTES       = 32,
-  parameter C_DEC_IF_DATA_WIDTH   = 64,
-  parameter C_DEC_IF_EMPTY_WIDTH  = 64,
 
   //   Strategy Params
   parameter HPB_ASYNC_HOST        = 0,
@@ -41,6 +39,8 @@ module tick2trade #(
 
   );
 
+  localparam int C_DEC_IF_EMPTY_WIDTH = $clog2(C_PKT_BEAT_BYTES);
+  localparam int C_DEC_IF_DATA_WIDTH  = C_PKT_BEAT_BYTES*8;
 
   // Interface between Feed and Strategy
   avalon_if #(.DATA_WIDTH  (C_DEC_IF_DATA_WIDTH),
