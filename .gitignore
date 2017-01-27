@@ -20,3 +20,4 @@ certe_dump.xml
 *.vcd
 *_record.txt
 coverage
+/.project

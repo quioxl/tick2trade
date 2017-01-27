@@ -10,10 +10,6 @@ class strategy_env extends uvm_env;
   strategy_scoreboard scoreboard_h;
   new_order_generator new_order_gen_h;
 
-  //uvm_analysis_port #(avalon_seq_item_base) strategy_ap;
-
-  //uvm_sequencer#(avalon_seq_item_base) strategy_message_seqr_h;
-
   function new(string name, uvm_component parent);
     super.new(name,parent);
   endfunction
@@ -41,7 +37,7 @@ class strategy_env extends uvm_env;
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
-    scoreboard_h.cfg_h = cfg_h;
+    scoreboard_h.enable_sb = cfg_h.enable_sb;
 
     //Connect the master agent and the host agent to the predictor
     master_agent_h.ap.connect(predictor_h.analysis_export);
