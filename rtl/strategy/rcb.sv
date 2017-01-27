@@ -58,7 +58,6 @@ module rcb
 
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
-  // FIXME - dont register anymore.
   // FIXME - add error registers.
   //---------------------------------------------------
   always_comb begin

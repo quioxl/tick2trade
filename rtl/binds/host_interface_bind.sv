@@ -31,7 +31,7 @@ interface host_interface_bind (
 
   `assert_prop_default(no_unknown,
                       (!$isunknown(reset_n) && !$isunknown(in_config_valid) &&
-                       $isunknown(in_config_data) && !$isunknown(in_config_accept)),
+                       !$isunknown(in_config_data) && !$isunknown(in_config_accept)),
                       "One of the host_interface signals is an 'x' or a 'z'.")
 
   initial begin

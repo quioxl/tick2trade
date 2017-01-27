@@ -19,7 +19,7 @@
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
-interface avalon_if_bind #( parameter DATA_WIDTH = 64, 
+interface avalon_if_bind #( parameter DATA_WIDTH = 64,
                             parameter EMPTY_WIDTH = 3) (
 
    input                     clk,
@@ -50,11 +50,11 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
   end
 
   `assert_prop_default(assert_invalid_eop,
-                      (valid |-> ##1 endofpacket),
+                      (endofpacket |-> valid),
                       "EOP asserted without valid")
 
   `assert_prop_default(assert_invalid_error,
-                      (error),
+                      (!error),
                       "EOP asserted without valid")
 
   `assert_prop_default(valid_deassert,
