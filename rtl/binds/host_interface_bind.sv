@@ -19,7 +19,7 @@
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
-module host_interface_bind (
+interface host_interface_bind (
 
   input         clk,
   input         reset_n,
@@ -38,7 +38,7 @@ module host_interface_bind (
     $display("INFO: host_interface_bind file loaded");
   end
 
-endmodule
+endinterface : host_interface_bind
 
 // Bind it
 bind host_interface host_interface_bind host_interface_bound (.*);

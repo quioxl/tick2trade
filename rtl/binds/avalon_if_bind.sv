@@ -19,18 +19,18 @@
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
-module avalon_if_bind (
+interface avalon_if_bind #( parameter DATA_WIDTH = 64, 
+                            parameter EMPTY_WIDTH = 3) (
 
-	 input             clk,
-	 input             reset_n,
-   input             in_valid,
-   input             ready,
-   input             valid,
-   input             startofpacket,
-   input             endofpacket,
-   input     [63:0]  data,
-   input      [2:0]  empty,
-   input             error
+   input                     clk,
+   input                     reset_n,
+   input                     ready,
+   input                     valid,
+   input                     startofpacket,
+   input                     endofpacket,
+   input [(DATA_WIDTH-1):0]  data,
+   input [(EMPTY_WIDTH-1):0] empty,
+   input                     error
 
  );
 
@@ -65,7 +65,7 @@ module avalon_if_bind (
     $display("INFO: avalon_if_bind file loaded");
   end
 
-endmodule
+endinterface : avalon_if_bind
 
 // Bind it
-bind avalon_if avalon_if_bind  avalon_if_bound (.*);
+bind avalon_if avalon_if_bind #(DATA_WIDTH, EMPTY_WIDTH) avalon_if_bound (.*);
