@@ -40,22 +40,10 @@ interface rcb_bind #(
    input                      clk,
    input                      reset_n,
    input                      sef_read,
-   input                      accept_write_req,
    input                      ignore_hpb_wr_req_q,
    hpb_if                     hpb_if_i
 );
 
-  reg wr_req_q;
-
-  // get registered version of config valid because host_msg_map is registered
-  always_ff @(posedge clk) begin
-    if (!reset_n) begin
-      wr_req_q <= 1'b0;
-    end else begin
-      wr_req_q <= hpb_if_i.hpb_wr_req;
-    end
-
-  end
 
   //------------------------------------------------------------------------------------
   // Assertions
