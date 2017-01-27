@@ -102,9 +102,9 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
   //------------------------------------------------------------------------------------
   // Assertions
   //------------------------------------------------------------------------------------
-  `assert_prop_default(assert_invalid_eop,
-                      (endofpacket |-> valid),
-                      "EOP asserted without valid")
+//  `assert_prop_default(assert_invalid_eop,
+//                      (endofpacket |-> valid),
+//                      "EOP asserted without valid")
 
   `assert_prop_default(assert_invalid_error,
                       (!error),
