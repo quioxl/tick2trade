@@ -3,7 +3,6 @@ class system_test_base extends uvm_test;
 
   system_env env_h;
   system_env_config cfg_h;
-  //uvm_sequencer #(avalon_seq_item_base,avalon_seq_item_base) seqr_h;
 
   function new (string name = "system_test_base", uvm_component parent = null);
     super.new(name,parent);
