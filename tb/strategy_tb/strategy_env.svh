@@ -8,6 +8,7 @@ class strategy_env extends uvm_env;
   order_agent  order_agent_h;
   strategy_predictor predictor_h;
   strategy_scoreboard scoreboard_h;
+  new_order_generator new_order_gen_h;
 
   //uvm_analysis_port #(avalon_seq_item_base) strategy_ap;
 
@@ -35,6 +36,8 @@ class strategy_env extends uvm_env;
     //Create the analysis components
     predictor_h = strategy_predictor::type_id::create("predictor_h",this);
     scoreboard_h = strategy_scoreboard::type_id::create("scoreboard_h",this);
+    if (cfg_h.enable_new_order_gen)
+      new_order_gen_h = new_order_generator::type_id::create("new_order_gen_h",this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
@@ -46,6 +49,12 @@ class strategy_env extends uvm_env;
     //Connect the predictor and the order agent to the scoreboard
     predictor_h.ap.connect(scoreboard_h.expect_ai);
     order_agent_h.ap.connect(scoreboard_h.actual_ai);
+
+    if (cfg_h.enable_new_order_gen) begin
+      new_order_gen_h.host_seqr_h = host_agent_h.seqr_h;
+      order_agent_h.ap.connect(new_order_gen_h.analysis_export);
+    end
+    
   endfunction
 
 endclass

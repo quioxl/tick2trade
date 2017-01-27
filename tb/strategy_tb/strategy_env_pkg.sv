@@ -28,6 +28,7 @@ package strategy_env_pkg;
   `include "strategy_env_config.svh"
   `include "strategy_predictor.svh"
   `include "strategy_scoreboard.svh"
+  `include "new_order_generator.svh"
   `include "strategy_env.svh"
   //`include "strategy_simple_seq.svh"
 endpackage : strategy_env_pkg

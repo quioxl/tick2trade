@@ -17,7 +17,7 @@ class sanity_test extends strategy_test_base;
     feed_sym_seq_h.start(env_h.master_agent_h.seqr_h);
     feed_seq_h = random_feed_traffic_seq::type_id::create("feed_seq_h");
     feed_seq_h.start(env_h.master_agent_h.seqr_h);
-    #10us;
+    #1us;
     phase.drop_objection(this);
   endtask
 

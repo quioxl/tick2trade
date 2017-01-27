@@ -6,7 +6,7 @@ class strategy_env_config extends uvm_object;
   order_config  order_cfg_h;
 
   bit enable_sb = 1;
-  //symbol_mapper mapper_h;
+  bit enable_new_order_gen = 1;
 
   function new(string name="strategy_env_config");
     super.new(name);
@@ -27,7 +27,7 @@ class strategy_env_config extends uvm_object;
   static function strategy_env_config get_config (uvm_component comp, string name = "strategy_env_config");
     strategy_env_config cfg_h;
     if (!uvm_config_db#(strategy_env_config)::get(comp,"",name,cfg_h)) begin
-      comp.uvm_report_error("CFG",$sformatf("Cannot get() config %s from uvm_config_db. Hvae you set() it?",name),,`__FILE__,`__LINE__);
+      comp.uvm_report_error("CFG",$sformatf("Cannot get() config %s from uvm_config_db. Have you set() it?",name),,`__FILE__,`__LINE__);
       return null;
     end
     return cfg_h;
