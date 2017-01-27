@@ -55,6 +55,7 @@ module tb;
   feed_recorder U_recorder (.master_if(avl_master_if));
 
   initial begin
+    $timeformat(-9,5,"ns",7);
     uvm_config_db#(virtual avalon_if)::set(null,"*","master_if",avl_master_if);
     uvm_config_db#(virtual avalon_if)::set(null,"*","slave_if",avl_slave_if);
     run_test();

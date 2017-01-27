@@ -84,6 +84,12 @@ class avalon_master_driver extends avalon_driver_base;
           vif.empty <= 'b0;
         end
       end
+      // There is a chance that we got a ready drop on the final beat, EOP=1. If so, need to drive 
+      // valid low for a bit longer.
+      if (vif.ready !== 1'b1) begin
+        wait_for_ready();
+        vif.valid <= 1'b1;
+      end
       // Insert delay gap
       repeat (trans_h.delay_gap) begin
         @(posedge vif.clk);

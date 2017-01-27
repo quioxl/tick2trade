@@ -31,7 +31,7 @@ class feed_scoreboard extends uvm_component;
     copy_h.payload = t.payload;
     // This isn't really needed but future enhancements to avalon_message_item may require it
     copy_h.msg_unpack();
-    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",copy_h.convert2string()),UVM_LOW)
+    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",copy_h.convert2string()),UVM_MEDIUM)
     if (expect_q.size() > actual_q.size()) begin
       compare_items(expect_q.pop_front(),copy_h);
     end else begin
@@ -45,7 +45,7 @@ class feed_scoreboard extends uvm_component;
     if (cfg_h.enable_sb == 1'b0) begin
       return;
     end
-    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",t.convert2string()),UVM_LOW)
+    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",t.convert2string()),UVM_MEDIUM)
     if (actual_q.size() > expect_q.size()) begin
       compare_items(t,actual_q.pop_front());
     end else begin
