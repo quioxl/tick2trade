@@ -8,14 +8,20 @@ add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/startofpacke
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/data
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/empty
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/endofpacket
-add wave -noupdate /tb/avl_master_if/error
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/error
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/ready
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/valid
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/startofpacket
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/data
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/empty
-add wave -noupdate /tb/avl_slave_if/endofpacket
-add wave -noupdate /tb/avl_slave_if/error
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/endofpacket
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/error
+add wave -noupdate -expand -group Assertions /tb/avl_master_if/avalon_if_bound/ERROR_assert_invalid_error
+add wave -noupdate -expand -group Assertions /tb/avl_master_if/avalon_if_bound/ERROR_valid_deassert
+add wave -noupdate -expand -group Assertions /tb/avl_master_if/avalon_if_bound/ERROR_invalid_eop
+add wave -noupdate -expand -group Assertions /tb/avl_slave_if/avalon_if_bound/ERROR_assert_invalid_error
+add wave -noupdate -expand -group Assertions /tb/avl_slave_if/avalon_if_bound/ERROR_valid_deassert
+add wave -noupdate -expand -group Assertions /tb/avl_slave_if/avalon_if_bound/ERROR_invalid_eop
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {235000 ps} 0}
 quietly wave cursor active 1
@@ -33,4 +39,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits fs
 update
-WaveRestoreZoom {169123 ps} {663139 ps}
+WaveRestoreZoom {0 ps} {494016 ps}
