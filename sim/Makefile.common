@@ -15,14 +15,25 @@ DEBUG ?= 0
 ## Wavefile format for use in debugger
 WAVEFILE ?= wave.do
 
+## Verbosity level
+VERBOSITY ?= UVM_MEDIUM
+
+## Coverage options
+COVERAGE ?= 1
+VSIM_COVERAGE_0 =
+VSIM_COVERAGE_1 = -coverstore ./coverage -testname $(TESTNAME)
+VSIM_COVERAGE = $(VSIM_COVERAGE_$(COVERAGE))
+
 ## Simulator options depend on whether or not DEBUG is desired or not
 VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
-VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg -do "log -r /*; do $(WAVEFILE); run 0"
+VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg \
+  -do "set WildcardFilter [lsearch -not -all -inline $WildcardFilter Assertion]; \
+    log -r /*; do $(WAVEFILE); run 0" -assertdebug
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
 
 ## Delete all generated files
 clean:
-	rm -rf *.log *~ *.bak work transcript *.wlf design.bin qwave.db dut_lib pkg_lib feed_tb_work certe_dump.xml *.vstf *.vcd *_record.txt
+	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave.db certe_dump.xml *.vstf *.vcd *_record.txt coverage
 
 ## Compile the RTL - a design.f file contains list of requisite files to compile. That file
 ## leverages TICK2TRADE_ROOT_DIR which is why that variable is exported
@@ -54,5 +65,8 @@ build_order:
 
 ## Run target, common across all benches. Invokes simulator
 run: 
-	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) -sv_seed $(SEED)
+	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) -l $(TESTNAME).log
 
+## Generate a UCDB (coverage database) for any simulations that have been run so far
+ucdb:
+	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log

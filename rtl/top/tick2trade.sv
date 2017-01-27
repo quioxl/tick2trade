@@ -13,20 +13,17 @@ module tick2trade #(
   parameter C_MSG_LEN_BYTES       = 2,
   parameter C_MSG_MIN_BYTES       = 8,
   parameter C_MSG_MAX_BYTES       = 32,
-  parameter C_DEC_IF_DATA_WIDTH   = 64,
-  parameter C_DEC_IF_EMPTY_WIDTH  = 64,
 
   //   Strategy Params
-  parameter SRCB_RCB_HOST_ARB     =  0,
+  parameter HPB_ASYNC_HOST        = 0,
+  parameter HPB_DATA_WIDTH        = 128,
+
   parameter SRCB_RAM_WIDTH        =  64,
   parameter SRCB_ADDR_WIDTH       =  14,
-  parameter PRCB_RCB_HOST_ARB     =  0,
   parameter PRCB_RAM_WIDTH        =  128,
   parameter PRCB_ADDR_WIDTH       =  14,
-  parameter VRCB_RCB_HOST_ARB     =  0,
   parameter VRCB_RAM_WIDTH        =  64,
   parameter VRCB_ADDR_WIDTH       =  14,
-  parameter ORCB_RCB_HOST_ARB     =  0,
   parameter ORCB_RAM_WIDTH        =  128,
   parameter ORCB_ADDR_WIDTH       =  14
 
@@ -42,6 +39,8 @@ module tick2trade #(
 
   );
 
+  localparam int C_DEC_IF_EMPTY_WIDTH = $clog2(C_PKT_BEAT_BYTES);
+  localparam int C_DEC_IF_DATA_WIDTH  = C_PKT_BEAT_BYTES*8;
 
   // Interface between Feed and Strategy
   avalon_if #(.DATA_WIDTH  (C_DEC_IF_DATA_WIDTH),
@@ -91,17 +90,14 @@ module tick2trade #(
   // Strategy
   //--------------------------------------------------
   tts #(
-
-   .SRCB_RCB_HOST_ARB   ( SRCB_RCB_HOST_ARB ),
+   .HPB_ASYNC_HOST      ( HPB_ASYNC_HOST    ),
+   .HPB_DATA_WIDTH      ( HPB_DATA_WIDTH    ),
    .SRCB_RAM_WIDTH      ( SRCB_RAM_WIDTH    ),
    .SRCB_ADDR_WIDTH     ( SRCB_ADDR_WIDTH   ),
-   .PRCB_RCB_HOST_ARB   ( PRCB_RCB_HOST_ARB ),
    .PRCB_RAM_WIDTH      ( PRCB_RAM_WIDTH    ),
    .PRCB_ADDR_WIDTH     ( PRCB_ADDR_WIDTH   ),
-   .VRCB_RCB_HOST_ARB   ( VRCB_RCB_HOST_ARB ),
    .VRCB_RAM_WIDTH      ( VRCB_RAM_WIDTH    ),
    .VRCB_ADDR_WIDTH     ( VRCB_ADDR_WIDTH   ),
-   .ORCB_RCB_HOST_ARB   ( ORCB_RCB_HOST_ARB ),
    .ORCB_RAM_WIDTH      ( ORCB_RAM_WIDTH    ),
    .ORCB_ADDR_WIDTH     ( ORCB_ADDR_WIDTH   )
 

@@ -49,16 +49,11 @@ module rcb
   // Register the output data to help with TCKO
   //---------------------------------------------------
   always_ff @(posedge clk) begin
-    if (!reset_n) begin
-      rcb_data <= 'h0;
-    end else begin
-      rcb_data <= RAM[ram_addr];
-    end
+    rcb_data <= RAM[ram_addr];
   end
 
   //---------------------------------------------------
   //Arbitrate the address.  Default to Feed Decoder
-  // FIXME - dont register anymore.
   // FIXME - add error registers.
   //---------------------------------------------------
   always_comb begin

@@ -6,7 +6,8 @@ class strategy_scoreboard extends uvm_component;
 
   order_item expect_q [$], actual_q [$];
 
-  strategy_env_config cfg_h;
+  bit enable_sb = 1;
+  //strategy_env_config cfg_h;
 
   int compare_count,miscompare_count;
 
@@ -20,7 +21,7 @@ class strategy_scoreboard extends uvm_component;
   endfunction
 
   function void write_STRATEGY_ACTUAL(order_item t);
-    if (cfg_h.enable_sb == 1'b0) begin
+    if (enable_sb == 1'b0) begin
       return;
     end
     `uvm_info("SB",$sformatf("Received strategy ACTUAL transaction: %s",t.convert2string()),UVM_LOW)
@@ -34,7 +35,7 @@ class strategy_scoreboard extends uvm_component;
   function void write_STRATEGY_EXPECT(order_item t);
     order_item copy_item;
     uvm_object clone_item;
-    if (cfg_h.enable_sb == 1'b0) begin
+    if (enable_sb == 1'b0) begin
       return;
     end
     clone_item = t.clone();

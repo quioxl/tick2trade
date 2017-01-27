@@ -9,4 +9,4 @@ $TICK2TRADE_ROOT_DIR/rtl/strategy/cmp_sub.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/cmp.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/sef.sv
 $TICK2TRADE_ROOT_DIR/rtl/strategy/tts.sv
-
+$TICK2TRADE_ROOT_DIR/rtl/top/tick2trade.sv

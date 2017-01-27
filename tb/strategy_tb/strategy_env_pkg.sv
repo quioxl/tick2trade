@@ -30,6 +30,6 @@ package strategy_env_pkg;
   `include "strategy_scoreboard.svh"
   `include "new_order_generator.svh"
   `include "strategy_env.svh"
-  //`include "strategy_simple_seq.svh"
+  
 endpackage : strategy_env_pkg
   

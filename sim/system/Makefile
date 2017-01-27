@@ -20,11 +20,14 @@ BINDS_TOP   = $(BINDS_TOP_$(USE_BINDS))
 
 
 build: build_avalon build_feed build_symbol_map build_host build_order build_dut
+	vlog $(TICK2TRADE_ROOT_DIR)/tb/feed_tb/feed_env_pkg.sv
 	vlog $(TICK2TRADE_ROOT_DIR)/tb/strategy_tb/strategy_env_pkg.sv \
-       $(TICK2TRADE_ROOT_DIR)/tests/strategy_seqs/strategy_seq_pkg.sv \
-       $(TICK2TRADE_ROOT_DIR)/tests/strategy_tests/strategy_test_pkg.sv
+       $(TICK2TRADE_ROOT_DIR)/tests/strategy_seqs/strategy_seq_pkg.sv
+	vlog $(TICK2TRADE_ROOT_DIR)/tb/system_tb/system_env_pkg.sv \
+       $(TICK2TRADE_ROOT_DIR)/tests/system_seqs/system_seq_pkg.sv \
+       $(TICK2TRADE_ROOT_DIR)/tests/system_tests/system_test_pkg.sv
 	$(BINDS_VLOG)
-	vlog $(TICK2TRADE_ROOT_DIR)/tb/strategy_tb/tb.sv
+	vlog $(TICK2TRADE_ROOT_DIR)/tb/system_tb/tb.sv
 	vopt tb $(BINDS_TOP) -o tb_opt
 	vopt tb $(BINDS_TOP) -o tb_dbg +acc
 

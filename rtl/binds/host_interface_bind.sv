@@ -19,7 +19,7 @@
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
-module host_interface_bind (
+interface host_interface_bind (
 
   input         clk,
   input         reset_n,
@@ -31,14 +31,14 @@ module host_interface_bind (
 
   `assert_prop_default(no_unknown,
                       (!$isunknown(reset_n) && !$isunknown(in_config_valid) &&
-                       $isunknown(in_config_data) && !$isunknown(in_config_accept)),
+                       !$isunknown(in_config_data) && !$isunknown(in_config_accept)),
                       "One of the host_interface signals is an 'x' or a 'z'.")
 
   initial begin
     $display("INFO: host_interface_bind file loaded");
   end
 
-endmodule
+endinterface : host_interface_bind
 
 // Bind it
 bind host_interface host_interface_bind host_interface_bound (.*);
