@@ -81,6 +81,9 @@ module feed_decoder #(
   parameter PKT_SOP_MSG_BYTE = 4;
   parameter PKT_SOP_MSG_BIT  = 32;
   
+  // LEN PTR is actually pointing to the byte before the length
+  // field as eom would do on previous messages, if they existed.
+  parameter LEN_PTR_START = 1;
   parameter MSG_PTR_START = 4; // Starts after the length
 
   typedef struct packed {
@@ -99,7 +102,8 @@ module feed_decoder #(
   logic         update_old_beat, get_new_beat, stall_out, ld_from_shadow;
   logic         vld_nxt, eom_nxt;
   logic         ld_ptrs, dly_ld;
-  logic         eom_in_old, som_hold, eom_at_end;
+  logic         eom_in_old, som_hold, eom_at_end, eom_then_som, get_from_old;
+  logic  [2:0]  length_ptr;
 
   // ------------------------------------------------------------------------
   // Data path
@@ -203,12 +207,13 @@ module feed_decoder #(
   // --------------------------------------------------------------------
 
   // The stall condition is if:
-  // 1. The eom pointer is going to be in position 0-4
+  // 1. The eom pointer is going to be in position 0-4 with
+  //    an expected som behind it
   always @(posedge clk) begin
     if (!reset_n) begin
       stall_out <= 1'b0;
     end else begin
-      stall_out <= (rd_ptr[2:0] <= eom_ptr[2:0]) & (eom_que_diff inside {[8:12]});
+      stall_out <= (rd_ptr[2:0] <= eom_ptr[2:0]) & (eom_que_diff inside {[8:12]}) & !new_beat.eop;
     end
   end
 
@@ -231,7 +236,7 @@ module feed_decoder #(
     end else begin
       out_valid         <= vld_nxt;
       // Want to send a start if old_beat says start and we aren't finishing up
-      out_startofpacket <= old_beat.som & !eom_in_old;
+      out_startofpacket <= old_beat.som & !eom_then_som;
       out_endofpacket   <= eom_nxt;
       out_empty         <= 7 - eom_rd_diff[2:0];
     end
@@ -250,7 +255,7 @@ module feed_decoder #(
   // we are just tracking data pointers from top to bottom.
 
   always @(posedge clk) begin
-    if (!reset_n | old_beat.eop) begin // Need to clear out after packets
+    if (!reset_n) begin // Need to clear out after packets
       que_ptr <= '0;
       rd_ptr  <= MSG_PTR_START;
       eom_ptr <= MSG_PTR_START-3;
@@ -270,10 +275,11 @@ module feed_decoder #(
   assign eom_nxt      = (eom_rd_diff  < 8) & old_beat.vld;
   assign eom_at_end   = eom_que_diff > 12;
   assign eom_in_old   = eom_que_diff < 8;
-  assign som_hold     = eom_in_old & old_beat.som;
+  assign eom_then_som = eom_que_diff < 7;
+  assign som_hold     = eom_then_som & old_beat.som;
 
   assign eom_incr     = eom_ptr + 3;
-  assign nxt_rd_ptr   = {3'b0, eom_incr[2:0]};
+  assign nxt_rd_ptr   = new_beat.sop ? MSG_PTR_START : {3'b0, eom_incr[2:0]};
 
   // Need to load pointers when:
   // 1. An sop is in the new stage
@@ -297,6 +303,7 @@ module feed_decoder #(
   // new pointers from there, otherwise they load from the two bytes
   // behind the eom pointer.
   assign get_from_old = eom_in_old & !new_beat.sop;
+  assign length_ptr   = new_beat.sop ? LEN_PTR_START : eom_ptr[2:0];
 
   always_comb begin
     // Not defined for cases where the eom pointer
@@ -304,7 +311,7 @@ module feed_decoder #(
     // can be loaded to get the length. Will let
     // those cases fall to default so the tools
     // can optimize.
-    case ({get_from_old,eom_ptr[2:0]})
+    case ({get_from_old,length_ptr})
       4'b0_000 : nxt_len <= new_beat.data[55:40];
       4'b0_001 : nxt_len <= new_beat.data[47:32];
       4'b0_010 : nxt_len <= new_beat.data[39:24];
