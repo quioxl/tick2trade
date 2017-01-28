@@ -176,7 +176,6 @@ module feed_decoder #(
   // 3. If the last beat of the previous message completed
   //    But the som will be in the new_beat on the next cycle
   assign update_old_beat = !old_beat.vld | 
-                           // (vld_nxt & (!som_hold | old_beat.eop)) |
                            (vld_nxt & !som_hold) | old_beat.eop |
                            dly_ld;
 
@@ -225,7 +224,7 @@ module feed_decoder #(
   //     ASSERTION : Need to make sure that vld_nxt isn't held (does it matter?)
   //                 AND need to make sure eom isn't missed.
   assign vld_nxt = old_beat.vld & (new_beat.vld | eom_in_old) & 
-                   !dly_ld & !(old_beat.eop & !eom_nxt);
+                   !dly_ld & !(old_beat.eop & !eom_nxt) & out_ready;
 
   always @(posedge clk) begin
     if (!reset_n) begin
