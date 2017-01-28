@@ -46,6 +46,7 @@ class avalon_monitor extends uvm_monitor;
       // push a beat-worth of data into the accumulator
       while (vif.endofpacket !== 1'b1) begin
         p.push_back(vif.data);
+        `uvm_info("MON",$sformatf("Pushed 0x%16x onto queue",vif.data),UVM_HIGH)
         @(posedge vif.clk);
         // If valid went low again, move clock forward until it is high
         while (vif.valid !== 1'b1) @(posedge vif.clk);

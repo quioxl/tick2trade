@@ -13,7 +13,7 @@ class feed_scoreboard extends uvm_component;
   uvm_analysis_imp_FEED_ACTUAL #(avalon_seq_item_base,feed_scoreboard) actual_ai;
   uvm_analysis_imp_FEED_EXPECT #(avalon_seq_item_base,feed_scoreboard) expect_ai;
 
-  avalon_seq_item_base expect_q [$], actual_q [$];
+  avalon_message_item expect_q [$], actual_q [$];
 
   feed_env_config cfg_h;
 
@@ -29,33 +29,31 @@ class feed_scoreboard extends uvm_component;
   endfunction
 
   function void write_FEED_ACTUAL(avalon_seq_item_base t);
-    avalon_seq_item_base clone_h;
+    avalon_message_item clone_h;
     if (cfg_h.enable_sb == 1'b0) begin
       return;
     end
-    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",t.convert2string()),UVM_MEDIUM)
+    clone_h = avalon_message_item::type_id::create("clone_h");
+    clone_h.payload = t.payload;
+    `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",clone_h.convert2string()),UVM_MEDIUM)
     if (expect_q.size() > actual_q.size()) begin
-      compare_items(expect_q.pop_front(),t);
+      compare_items(expect_q.pop_front(),clone_h);
     end else begin
-      if (!$cast(clone_h,t.clone())) begin
-        `uvm_fatal("SB","Clone of actual item failed")
-      end
       actual_q.push_back(clone_h);
     end
   endfunction
 
   function void write_FEED_EXPECT(avalon_seq_item_base t);
-    avalon_seq_item_base clone_h;
+    avalon_message_item clone_h;
     if (cfg_h.enable_sb == 1'b0) begin
       return;
     end
-    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",t.convert2string()),UVM_MEDIUM)
+    clone_h = avalon_message_item::type_id::create("clone_h");
+    clone_h.payload = t.payload;
+    `uvm_info("SB",$sformatf("Received feed EXPECT transaction: %s",clone_h.convert2string()),UVM_MEDIUM)
     if (actual_q.size() > expect_q.size()) begin
-      compare_items(t,actual_q.pop_front());
+      compare_items(clone_h,actual_q.pop_front());
     end else begin
-      if (!$cast(clone_h,t.clone())) begin
-        `uvm_fatal("SB","Clone of expect item failed")
-      end
       expect_q.push_back(clone_h);
     end
   endfunction

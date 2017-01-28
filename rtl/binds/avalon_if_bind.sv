@@ -10,11 +10,11 @@
   import uvm_pkg::*;
   `define assert_prop_default(check, pa, msg) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else \
-                                    uvm_report_error("avalon_if_bind", {`"``check``: `",msg});
+                                    uvm_report_error("avalon_if_bind", $sformatf("(%m) %s : %s",`"``check``: `",msg));
 
   `define assert_prop_clkrst(check, pa, msg, dc, clk) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (dc) (pa)) else \
-                                    uvm_report_error("avalon_if_bind", {`"``check``: `",msg});
+                                    uvm_report_error("avalon_if_bind", $sformatf("(%m) %s : %s",`"``check``: `",msg));
 `else
   `define assert_prop_default(check, pa, msg) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
@@ -62,7 +62,7 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
       in_pkt <= 1'b0;
     end else begin
       if (valid && ready) begin
-        if (startofpacket && !endofpacket) begin
+        if (startofpacket && !in_pkt) begin
           in_pkt <= 1'b1;
         end else if (in_pkt && endofpacket) begin
           in_pkt <= 1'b0;
@@ -123,6 +123,11 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
   `assert_prop_default(invalid_eop,
                       ((endofpacket && valid) |->  (in_pkt || startofpacket)),
                       "EOP asserted while not in packet")
+
+  // Problem if we see valid active unless we are in a packet or we're starting a packet
+  `assert_prop_default(invalid_valid,
+                      (valid |-> (in_pkt || startofpacket)),
+                      "Valid asserted outside of packet")
 
   //------------------------------------------------------------------------------------
   // Embedded coverage
