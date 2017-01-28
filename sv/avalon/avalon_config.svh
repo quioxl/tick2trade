@@ -17,7 +17,7 @@ class avalon_config extends uvm_object;
   avalon_master_slave_enum master_slave = AVL_MASTER;
 
   // How often will the slave driver inject a stall (ready=0)
-  int slave_stall_frequency = 1;
+  int slave_stall_frequency = 0;
   // What will the duration of that stall be (min/max clocks)
   int slave_max_stall = 5;
   int slave_min_stall = 1;
