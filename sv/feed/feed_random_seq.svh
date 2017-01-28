@@ -19,6 +19,14 @@ class feed_random_seq extends uvm_sequence #(avalon_message_item);
       `uvm_info("SEQ",$sformatf("Sending feed message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
       finish_item(feed_trans_h);
     end
+    // Send one final item with send_now set to flush
+    start_item(feed_trans_h);
+    feed_trans_h.send_now = 1;
+    if (!feed_trans_h.randomize()) begin
+      `uvm_fatal("SEQ","Transaction randomization failed")
+    end
+    `uvm_info("SEQ",$sformatf("Sending feed message: %s",feed_trans_h.convert2string()),UVM_MEDIUM)
+    finish_item(feed_trans_h);
   endtask
 
 endclass

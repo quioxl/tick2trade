@@ -35,7 +35,7 @@ class feed_scoreboard extends uvm_component;
     end
     `uvm_info("SB",$sformatf("Received feed ACTUAL transaction: %s",t.convert2string()),UVM_MEDIUM)
     if (expect_q.size() > actual_q.size()) begin
-      compare_items(expect_q.pop_front(),clone_h);
+      compare_items(expect_q.pop_front(),t);
     end else begin
       if (!$cast(clone_h,t.clone())) begin
         `uvm_fatal("SB","Clone of actual item failed")

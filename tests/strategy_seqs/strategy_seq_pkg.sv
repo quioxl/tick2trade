@@ -12,6 +12,7 @@ package strategy_seq_pkg;
 `include "incr_host_program_seq.svh"
 `include "random_feed_traffic_seq.svh"
 `include "feed_symbol_match_seq.svh"
+`include "feed_all_messages_seq.svh"
 
 endpackage : strategy_seq_pkg
   
