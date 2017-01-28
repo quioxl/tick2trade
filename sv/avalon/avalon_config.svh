@@ -3,6 +3,13 @@
 class avalon_config extends uvm_object;
   `uvm_object_utils(avalon_config)
 
+  function new(string name="avalon_config");
+    super.new(name);
+    if ($value$plusargs("avl_slave_stall_freq=%d",slave_stall_frequency)) begin
+      `uvm_info("CFG",$sformatf("Overriding Avalon slave_stall_frequency to %0d%% from command-line",slave_stall_frequency),UVM_LOW)
+    end
+  endfunction
+
   // Virtual interface associated with a specific instantiation of the avalon agent
   virtual avalon_if vif;
 
@@ -17,7 +24,8 @@ class avalon_config extends uvm_object;
   avalon_master_slave_enum master_slave = AVL_MASTER;
 
   // How often will the slave driver inject a stall (ready=0)
-  int slave_stall_frequency = 0;
+  // Can override what is here with a plusarg
+  int slave_stall_frequency = 10;
   // What will the duration of that stall be (min/max clocks)
   int slave_max_stall = 5;
   int slave_min_stall = 1;

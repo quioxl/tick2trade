@@ -80,7 +80,7 @@ build_order:
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) \
     +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) \
-    -l $(TESTNAME).log -classdebug -assertdebug
+    -l $(TESTNAME).log -classdebug -assertdebug $(EXTRA_SIM_ARGS)
 
 ## Generate a UCDB (coverage database) for any simulations that have been run so far
 ucdb:
