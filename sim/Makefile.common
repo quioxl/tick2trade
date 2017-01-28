@@ -15,6 +15,12 @@ DEBUG ?= 0
 ## Wavefile format for use in debugger
 WAVEFILE ?= wave.do
 
+## Visualizer enable
+VIS ?= 0
+VISRUN_OPTS_0 ?=
+VISRUN_OPTS_1 ?= -qwavedb=+signal+report+memory=65536+uvm_schematic+transaction+class
+VISRUN_OPTS ?= $(VISRUN_OPTS_$(VIS))
+
 ## Verbosity level
 VERBOSITY ?= UVM_MEDIUM
 
@@ -25,15 +31,22 @@ VSIM_COVERAGE_1 = -coverstore ./coverage -testname $(TESTNAME)
 VSIM_COVERAGE = $(VSIM_COVERAGE_$(COVERAGE))
 
 ## Simulator options depend on whether or not DEBUG is desired or not
-VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none tb_opt
-VSIM_OPTS_1 = -onfinish stop -classdebug -uvmcontrol=all tb_dbg \
+VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none $(VISRUN_OPTS) tb_opt
+VSIM_OPTS_1 = -onfinish stop -uvmcontrol=all tb_dbg \
   -do "set WildcardFilter [lsearch -not -all -inline $WildcardFilter Assertion]; \
-    log -r /*; do $(WAVEFILE); run 0" -assertdebug
+    log -r /*; do $(WAVEFILE); run 0" 
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
+
+## Optimization options depend on DEBUG and VIS
+VOPT_OPT_ARGS_0 ?=
+VOPT_OPT_ARGS_1 ?= -designfile design.bin -debug
+VOPT_OPT_ARGS ?= $(VOPT_OPT_ARGS_$(VIS))
+VOPT_DBG_ARGS ?= +acc
 
 ## Delete all generated files
 clean:
-	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave.db certe_dump.xml *.vstf *.vcd *_record.txt coverage
+	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave.db \
+    certe_dump.xml *.vstf *.vcd *_record.txt coverage .visualizer
 
 ## Compile the RTL - a design.f file contains list of requisite files to compile. That file
 ## leverages TICK2TRADE_ROOT_DIR which is why that variable is exported
@@ -65,7 +78,9 @@ build_order:
 
 ## Run target, common across all benches. Invokes simulator
 run: 
-	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) -l $(TESTNAME).log
+	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) \
+    +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) \
+    -l $(TESTNAME).log -classdebug -assertdebug
 
 ## Generate a UCDB (coverage database) for any simulations that have been run so far
 ucdb:

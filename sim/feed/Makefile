@@ -17,6 +17,6 @@ build: build_avalon build_dut build_feed
 	vlog $(TICK2TRADE_ROOT_DIR)/tb/feed_tb/feed_env_pkg.sv $(TICK2TRADE_ROOT_DIR)/tests/feed_tests/feed_test_pkg.sv 
 	vlog $(TICK2TRADE_ROOT_DIR)/tb/feed_tb/tb.sv $(TICK2TRADE_ROOT_DIR)/tb/feed_tb/feed_recorder.sv
 	$(BINDS_VLOG)
-	vopt tb $(BINDS_TOP) -o tb_opt
-	vopt tb $(BINDS_TOP) -o tb_dbg +acc
+	vopt tb $(BINDS_TOP) $(VOPT_OPT_ARGS) -o tb_opt
+	vopt tb $(BINDS_TOP) $(VOPT_DBG_ARGS) -o tb_dbg +acc
 
