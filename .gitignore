@@ -21,3 +21,5 @@ certe_dump.xml
 *_record.txt
 coverage
 /.project
+design.bin
+qwave.db
