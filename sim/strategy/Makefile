@@ -28,3 +28,8 @@ build: build_avalon build_feed build_symbol_map build_host build_order build_dut
 	vopt tb $(BINDS_TOP) $(VOPT_OPT_ARGS) -o tb_opt
 	vopt tb $(BINDS_TOP) $(VOPT_DBG_ARGS) -o tb_dbg +acc
 
+TESTS = sanity_test basic_test all_messages_test
+$(TESTS): 
+	make run TESTNAME=$@
+
+regression: clean build $(TESTS) ucdb report
