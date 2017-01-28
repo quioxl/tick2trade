@@ -85,3 +85,6 @@ run:
 ## Generate a UCDB (coverage database) for any simulations that have been run so far
 ucdb:
 	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log
+
+vis:
+	visualizer -designfile design.bin -wavefile qwave.db

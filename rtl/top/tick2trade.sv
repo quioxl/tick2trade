@@ -42,6 +42,8 @@ module tick2trade #(
   localparam int C_DEC_IF_EMPTY_WIDTH = $clog2(C_PKT_BEAT_BYTES);
   localparam int C_DEC_IF_DATA_WIDTH  = C_PKT_BEAT_BYTES*8;
 
+  order_interface order_if2 ();   // Vivado issue with recognizing interfaces in the library running OOC
+
   // Interface between Feed and Strategy
   avalon_if #(.DATA_WIDTH  (C_DEC_IF_DATA_WIDTH),
               .EMPTY_WIDTH (C_DEC_IF_EMPTY_WIDTH)
