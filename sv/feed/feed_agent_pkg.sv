@@ -14,4 +14,5 @@ package feed_agent_pkg;
   `include "feed_layering.svh"
   `include "feed_simple_seq.svh"
   `include "feed_random_seq.svh"
+  `include "feed_api_seq.svh"
 endpackage
