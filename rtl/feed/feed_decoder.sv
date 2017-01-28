@@ -110,7 +110,7 @@ module feed_decoder #(
   // the next cycle.
   always @(posedge clk) begin
     if (!reset_n) shadow_beat <= '0;
-    else begin
+    else if (in_valid) begin
       shadow_beat.sop  <= in_startofpacket;
       shadow_beat.eop  <= in_endofpacket;
       shadow_beat.vld  <= in_valid;
@@ -172,7 +172,8 @@ module feed_decoder #(
   // 3. If the last beat of the previous message completed
   //    But the som will be in the new_beat on the next cycle
   assign update_old_beat = !old_beat.vld | 
-                           (vld_nxt & (!som_hold | old_beat.eop)) |
+                           // (vld_nxt & (!som_hold | old_beat.eop)) |
+                           (vld_nxt & !som_hold) | old_beat.eop |
                            dly_ld;
 
   // Read pointer should always be sitting within the old_beat, read data is
@@ -211,10 +212,15 @@ module feed_decoder #(
     end
   end
 
-  // We send a valid message beat if there is valid data in both
-  // beats, or if the eom_ptr is in the old beat and it is valid
-  // But, not if eom just occured and the som is not yet available
-  assign vld_nxt = old_beat.vld & (new_beat.vld | eom_in_old) & !dly_ld;
+  // We send a valid message beat if:
+  // 1. There is valid data in both beats OR
+  // 2. If the eom_ptr is in the old beat and it is valid...
+  // 2a. But, not if eom just occured and the som is not yet available
+  // 3. Also need to gate on the eop if the last beat is alreaady on the bus.
+  //     ASSERTION : Need to make sure that vld_nxt isn't held (does it matter?)
+  //                 AND need to make sure eom isn't missed.
+  assign vld_nxt = old_beat.vld & (new_beat.vld | eom_in_old) & 
+                   !dly_ld & !(old_beat.eop & !eom_nxt);
 
   always @(posedge clk) begin
     if (!reset_n) begin
@@ -286,13 +292,19 @@ module feed_decoder #(
     else          dly_ld <= eom_nxt & eom_at_end;
   end
   
+
+  // When there is an sop in the new beat, we always want to load the
+  // new pointers from there, otherwise they load from the two bytes
+  // behind the eom pointer.
+  assign get_from_old = eom_in_old & !new_beat.sop;
+
   always_comb begin
     // Not defined for cases where the eom pointer
     // is in a position such that not enough data
     // can be loaded to get the length. Will let
     // those cases fall to default so the tools
     // can optimize.
-    case ({eom_in_old,eom_ptr[2:0]})
+    case ({get_from_old,eom_ptr[2:0]})
       4'b0_000 : nxt_len <= new_beat.data[55:40];
       4'b0_001 : nxt_len <= new_beat.data[47:32];
       4'b0_010 : nxt_len <= new_beat.data[39:24];
