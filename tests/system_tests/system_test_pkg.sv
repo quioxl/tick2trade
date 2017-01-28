@@ -12,5 +12,6 @@ package system_test_pkg;
   `include "system_test_base.svh"
   `include "sanity_test.svh"
   //`include "basic_test.svh"
+  `include "all_messages_test.svh"
   
 endpackage : system_test_pkg
