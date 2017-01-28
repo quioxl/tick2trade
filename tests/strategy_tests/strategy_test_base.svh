@@ -1,6 +1,8 @@
 class strategy_test_base extends uvm_test;
   `uvm_component_utils(strategy_test_base)
 
+  int messege_sent_count = 0;
+
   strategy_env env_h;
   strategy_env_config cfg_h;
   //uvm_sequencer #(avalon_seq_item_base,avalon_seq_item_base) seqr_h;
@@ -27,5 +29,16 @@ class strategy_test_base extends uvm_test;
     cfg_h.wait_for_reset();
     cfg_h.wait_for_clocks(10);
   endtask : run_phase
+
+  function void report_phase(uvm_phase phase);
+    string message;
+    super.report_phase(phase);
+    $sformat(message, "\n-------------------------------------\nMessages Sent In           : %0d\nMessages Discarded          : %0d\nOrders Compared Successfully: %0d\nOrders Miscompared          : %0d\n-------------------------------------\n", messege_sent_count, env_h.predictor_h.discarded.sum(), env_h.scoreboard_h.compare_count, env_h.scoreboard_h.miscompare_count);
+    if (messege_sent_count == (env_h.predictor_h.discarded.sum() + env_h.scoreboard_h.compare_count))
+      $sformat(message, "%s               PASSED\n-------------------------------------", message);
+    else
+      $sformat(message, "%s               FAILED\n-------------------------------------", message);
+    `uvm_info("TEST_STATUS", message, UVM_NONE)
+  endfunction : report_phase
 
 endclass

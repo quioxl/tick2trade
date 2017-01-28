@@ -3,6 +3,8 @@ class new_order_generator extends uvm_subscriber #(order_item);
   `uvm_component_utils(new_order_generator)
 
   //Data members
+  symbol_t outstanding_symbols[$];
+  event new_symbol;
   host_symbol_seq symbol_seq_h;
   uvm_sequencer #(host_item) host_seqr_h;
 
@@ -20,16 +22,25 @@ class new_order_generator extends uvm_subscriber #(order_item);
   
   function void write(order_item t);
     //Find the symbol
-    symbol_t symbol = t.data[127:112];
-    //Create new symbol entry
-    symbol_seq_h.sym_update = 1;
-    if (!symbol_seq_h.randomize() with
-          {symbol == local::symbol; }) begin
-      `uvm_fatal("SEQ","Sequence randomization failed")
-    end
-    fork //Must fork/join_none becuase write() is a function
-      symbol_seq_h.start(host_seqr_h);
-    join_none
+    outstanding_symbols.push_back(t.data[127:112]);
+    -> new_symbol;
   endfunction : write
 
+  task run_phase(uvm_phase phase);
+    symbol_t symbol;
+    forever begin
+      @(new_symbol);
+      do begin
+        //Create new symbol entry
+        symbol = outstanding_symbols.pop_front();
+        symbol_seq_h.sym_update = 1;
+        if (!symbol_seq_h.randomize() with
+            {symbol == local::symbol; }) begin
+          `uvm_fatal("SEQ","Sequence randomization failed")
+        end
+        symbol_seq_h.start(host_seqr_h);
+      end while (outstanding_symbols.size() != 0);
+    end // forever begin
+  endtask : run_phase
+  
 endclass : new_order_generator

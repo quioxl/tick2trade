@@ -21,6 +21,7 @@ class basic_test extends strategy_test_base;
     host_seq_h.start(env_h.host_agent_h.seqr_h);
     feed_sym_seq_h = feed_symbol_match_seq::type_id::create("feed_sym_seq_h");
     feed_sym_seq_h.trans_count = 20;
+    messege_sent_count += feed_sym_seq_h.trans_count;
     feed_sym_seq_h.start(env_h.master_agent_h.seqr_h);
     #1us;
     phase.drop_objection(this);
