@@ -46,7 +46,7 @@ VOPT_DBG_ARGS ?= +acc
 ## Delete all generated files
 clean:
 	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave.db \
-    certe_dump.xml *.vstf *.vcd *_record.txt coverage .visualizer
+    certe_dump.xml *.vstf *.vcd *_record.txt coverage .visualizer covhtmlreport
 
 ## Compile the RTL - a design.f file contains list of requisite files to compile. That file
 ## leverages TICK2TRADE_ROOT_DIR which is why that variable is exported
@@ -86,5 +86,11 @@ run:
 ucdb:
 	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log
 
+## Generate HTML report based on UCDB
+report:
+	vcover report -html final.ucdb
+
+## Visualizer Debug environment
 vis:
 	visualizer -designfile design.bin -wavefile qwave.db
+

@@ -153,7 +153,7 @@ module feed_decoder #(
   //   1. There is an sop OR
   //   2. The eom ptr is between 5 and 12 bytes
   //      from the top of the queue
-  assign new_beat.som = new_beat.vld & (new_beat.sop | ((eom_que_diff < 13) & (eom_que_diff > 4)));
+  assign new_beat.som = new_beat.vld & (new_beat.sop | (eom_que_diff inside {[5:12]}));
 
   always @(posedge clk) begin
     if (!reset_n)        old_beat <= '0;
@@ -169,7 +169,11 @@ module feed_decoder #(
   // 1. Old beat is invalid
   // 2. next message cycle is valid AND the first beat
   //    of a new message isn't in the old_beat
-  assign update_old_beat = !old_beat.vld | (vld_nxt & (!som_hold | old_beat.eop));
+  // 3. If the last beat of the previous message completed
+  //    But the som will be in the new_beat on the next cycle
+  assign update_old_beat = !old_beat.vld | 
+                           (vld_nxt & (!som_hold | old_beat.eop)) |
+                           dly_ld;
 
   // Read pointer should always be sitting within the old_beat, read data is
   // 8-bytes inclusive of the read pointer location.
@@ -209,7 +213,8 @@ module feed_decoder #(
 
   // We send a valid message beat if there is valid data in both
   // beats, or if the eom_ptr is in the old beat and it is valid
-  assign vld_nxt = old_beat.vld & (new_beat.vld | eom_in_old);
+  // But, not if eom just occured and the som is not yet available
+  assign vld_nxt = old_beat.vld & (new_beat.vld | eom_in_old) & !dly_ld;
 
   always @(posedge clk) begin
     if (!reset_n) begin
@@ -257,7 +262,7 @@ module feed_decoder #(
   assign eom_que_diff = eom_ptr - que_ptr;
 
   assign eom_nxt      = (eom_rd_diff  < 8) & old_beat.vld;
-  assign eom_at_end   = eom_que_diff > 14;
+  assign eom_at_end   = eom_que_diff > 12;
   assign eom_in_old   = eom_que_diff < 8;
   assign som_hold     = eom_in_old & old_beat.som;
 
@@ -271,6 +276,11 @@ module feed_decoder #(
   // If the read pointer is too far down, then need a delayed load
   assign ld_ptrs     = new_beat.sop | (eom_nxt & !eom_at_end) | dly_ld;
 
+  // The delayed load allows a pointer far down in the new queue
+  // to propagate to the new queue before loading the pointers.
+  // In this case, there will be a dead cycle on the bus in
+  // order to allow the som to get back up into the old beat.
+  // So dly needs to hold off valid and ptr math for a cycle.
   always @(posedge clk) begin
     if (!reset_n) dly_ld <= 0;
     else          dly_ld <= eom_nxt & eom_at_end;

@@ -9,6 +9,7 @@ add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/data
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/empty
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/endofpacket
 add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/error
+add wave -noupdate -expand -group {Avalon Master} /tb/avl_master_if/avalon_if_bound/in_pkt
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/ready
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/valid
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/startofpacket
@@ -16,8 +17,9 @@ add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/data
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/empty
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/endofpacket
 add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/error
+add wave -noupdate -expand -group {Avalon Slave} /tb/avl_slave_if/avalon_if_bound/in_pkt
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {235000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {263825 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 500
 configure wave -valuecolwidth 100
@@ -33,4 +35,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits fs
 update
-WaveRestoreZoom {57695685 ps} {58189701 ps}
+WaveRestoreZoom {187599 ps} {731611 ps}
