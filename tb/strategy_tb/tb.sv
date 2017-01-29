@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 module tb;
 
+  parameter HPB_ASYNC_HOST = 0;
+  
   import uvm_pkg::*;
   import avalon_pkg::*;
   import host_agent_pkg::*;
@@ -14,7 +16,7 @@ module tb;
     clk = 1'b0;
     forever #5ns clk = ~clk;
   end
-
+  
   initial begin
     reset_n = 1'b0;
     repeat (10) @(negedge clk);
@@ -26,15 +28,30 @@ module tb;
   assign feed_if.reset_n = reset_n;
 
   host_interface host_if ();
-  assign host_if.clk = clk;
   assign host_if.reset_n = reset_n;
 
+  generate //Generate to create an async clock if configured to do so
+    if (HPB_ASYNC_HOST == 1) begin : host_clk
+      bit hpb_clk;
+      
+      initial begin
+        hpb_clk = 1'b0;
+        forever #6ns hpb_clk = ~hpb_clk;
+      end
+      
+      assign host_if.clk = hpb_clk;
+    end else begin : host_clk
+      assign host_if.clk = clk;
+    end
+  endgenerate
+  
+  
   order_interface order_if ();
   assign order_if.clk = clk;
   assign order_if.reset_n = reset_n;
 
-  // DUT Instantiation (Using default parameters)
-  tts DUT (
+  // DUT Instantiation (Using default parameters other than async host clock)
+  tts #(.HPB_ASYNC_HOST(HPB_ASYNC_HOST)) DUT (
            .clk                (clk),
            .reset_n            (reset_n),
            .dec_if             (feed_if),

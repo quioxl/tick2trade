@@ -1,5 +1,6 @@
 include ../Makefile.common
 
+ASYNC_HOST ?= 0
 USE_BINDS ?= 1
 
 BINDS_VLOG_0 =
@@ -25,8 +26,10 @@ build: build_avalon build_feed build_symbol_map build_host build_order build_dut
        $(TICK2TRADE_ROOT_DIR)/tests/strategy_tests/strategy_test_pkg.sv
 	$(BINDS_VLOG)
 	vlog $(TICK2TRADE_ROOT_DIR)/tb/strategy_tb/tb.sv
-	vopt tb $(BINDS_TOP) $(VOPT_OPT_ARGS) -o tb_opt
-	vopt tb $(BINDS_TOP) $(VOPT_DBG_ARGS) -o tb_dbg +acc
+	vopt tb $(BINDS_TOP) $(VOPT_OPT_ARGS) -G HPB_ASYNC_HOST=$(ASYNC_HOST) \
+	     -o tb_opt
+	vopt tb $(BINDS_TOP) $(VOPT_DBG_ARGS) -G HPB_ASYNC_HOST=$(ASYNC_HOST) +acc \
+       -o tb_dbg
 
 TESTS = sanity_test basic_test all_messages_test
 $(TESTS): 
