@@ -9,8 +9,11 @@ class feed_env extends uvm_env;
   feed_monitor monitor_h;
   feed_predictor predictor_h;
   feed_scoreboard scoreboard_h;
+  feed_streaming_monitor stream_mon_h;
 
   uvm_analysis_port #(avalon_message_item) feed_ap;
+
+  uvm_analysis_imp #(avalon_message_item,feed_env) stream_ai;
 
   uvm_sequencer#(avalon_message_item) feed_message_seqr_h;
 
@@ -35,6 +38,9 @@ class feed_env extends uvm_env;
     predictor_h = feed_predictor::type_id::create("predictor_h",this);
     scoreboard_h = feed_scoreboard::type_id::create("scoreboard_h",this);
     feed_ap = new("feed_ap",this);
+    stream_ai = new("stream_ai",this);
+    stream_mon_h = feed_streaming_monitor::type_id::create("stream_mon_h",this);
+    stream_mon_h.cfg_h = cfg_h.master_cfg_h;
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
@@ -46,6 +52,11 @@ class feed_env extends uvm_env;
     monitor_h.ap.connect(predictor_h.analysis_export);
     predictor_h.ap.connect(scoreboard_h.expect_ai);
     slave_agent_h.ap.connect(scoreboard_h.actual_ai);
+    stream_mon_h.ap.connect(stream_ai);
+  endfunction
+
+  function void write(avalon_message_item t);
+    `uvm_info("ENV",$sformatf("Stream monitor saw this: %s",t.convert2string()),UVM_MEDIUM)
   endfunction
 
 endclass
