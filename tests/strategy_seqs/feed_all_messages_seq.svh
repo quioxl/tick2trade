@@ -13,6 +13,7 @@ class feed_all_messages_seq extends feed_api_seq;
           {symbol_id == mapper.find_random_symbol();}) begin
       `uvm_fatal("SEQ","Transaction randomization failed")
     end
+    //`uvm_info("FEED_ALL_MESSAGE_SEQ", $sformatf("Symbol used: 16'h%04x", feed_h.symbol_id), UVM_MEDIUM)
   endfunction : randomize_feed_msg
   
 

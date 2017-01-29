@@ -28,6 +28,16 @@ add wave -noupdate -expand -group {Feed Interface} /tb/feed_if/endofpacket
 add wave -noupdate -expand -group {Feed Interface} /tb/feed_if/data
 add wave -noupdate -expand -group {Feed Interface} /tb/feed_if/empty
 add wave -noupdate -expand -group {Feed Interface} /tb/feed_if/error
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/clk
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/reset_n
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/ready
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/valid
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/startofpacket
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/endofpacket
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/data
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/empty
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/error
+add wave -noupdate -expand -group {Feed -> TTS Avalon IF} /tb/DUT/dec_if/dec_data
 add wave -noupdate -expand -group {Host Interface} /tb/host_if/clk
 add wave -noupdate -expand -group {Host Interface} /tb/host_if/reset_n
 add wave -noupdate -expand -group {Host Interface} /tb/host_if/in_config_valid

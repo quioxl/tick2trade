@@ -15,6 +15,7 @@ class system_env extends uvm_env;
   uvm_analysis_port #(avalon_message_item) feed_ap;
   uvm_sequencer#(avalon_message_item) feed_message_seqr_h;
   //Analysis
+  feed_streaming_monitor stream_mon_h;
   feed_predictor      feed_pred_h;
   strategy_predictor  strat_pred_h;
   strategy_scoreboard scoreboard_h;
@@ -47,6 +48,8 @@ class system_env extends uvm_env;
     feed_message_seqr_h = new("feed_message_seqr_h",this);
     
     //Create the analysis components
+    stream_mon_h = feed_streaming_monitor::type_id::create("stream_mon_h",this);
+    stream_mon_h.cfg_h = cfg_h.master_cfg_h;
     feed_pred_h  = feed_predictor::type_id::create("feed_pred_h",this);
     strat_pred_h = strategy_predictor::type_id::create("strat_pred_h",this);
     scoreboard_h = strategy_scoreboard::type_id::create("scoreboard_h",this);
@@ -64,7 +67,8 @@ class system_env extends uvm_env;
     master_agent_h.ap.connect(monitor_h.analysis_export);
     
     //Connect the layering agent to the feed predictor
-    monitor_h.ap.connect(feed_pred_h.analysis_export);
+    //monitor_h.ap.connect(feed_pred_h.analysis_export);
+    stream_mon_h.ap.connect(feed_pred_h.analysis_export);
     //Connect the feed predictor and the host agent to the strategy predictor
     feed_pred_h.ap.connect(strat_pred_h.analysis_export);
     host_agent_h.mon_out_ap.connect(strat_pred_h.host_export);

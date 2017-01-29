@@ -53,10 +53,11 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
           temp_order.symbol   = {upper_symbol, temp.addr[13:0]};
           temp_order.valid    = sym_map.valid;
           temp_order.map_addr = sym_map.addr;
-          if (temp_order.valid == 0)
+          if (temp_order.valid == 0) begin
             //Invalid: delete from array to prevent inadvertant match
+          //`uvm_info("STRAT_PRED", $sformatf("Symbol From Order: 16'h%04x", temp_order.symbol) , UVM_MEDIUM)
             orders.delete(temp_order.symbol);
-          else
+          end else
             //Valid: add to array for matching purposes
             orders[temp_order.symbol] = temp_order;
         end // case: SYMBOL
@@ -92,6 +93,7 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
       feed_item.msg_unpack();
       if (feed_item.msg_type == "NEW") begin //Match the "New" message type
         if (orders.exists(feed_item.symbol_id)) begin //Check if the symbol has been programmed
+          //`uvm_info("STRAT_PRED", $sformatf("Symbol From Feed: 16'h%04x", feed_item.symbol_id) , UVM_MEDIUM)
           order = orders[feed_item.symbol_id];
           if (feed_item.volume > order.min_vol &&
               feed_item.volume < order.max_vol &&
