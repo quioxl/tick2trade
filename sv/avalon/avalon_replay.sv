@@ -17,16 +17,20 @@ module avalon_replay #(parameter string fname = "avalon_record.txt") (avalon_if 
     if (fd==0) $fatal("Unable to open %s in read mode",fname);
     do begin
       @(avif.clk);
-      code = $fscanf(fd,"%d:%b %b %b %b %b %b",count,avif.reset_n,
-                                                     avif.valid,
-                                                     avif.startofpacket,
-                                                     avif.endofpacket,
-                                                     avif.data,
-                                                     avif.empty);
-    end while (code==7);
+      code = $fscanf(fd,"%d:%b %b %b %b %b %b %b",count,
+                                                  avif.reset_n,
+                                                  avif.valid,
+                                                  avif.ready,
+                                                  avif.startofpacket,
+                                                  avif.endofpacket,
+                                                  avif.data,
+                                                  avif.empty);
+      $display("CODE:%0d",code);
+    end while (code==8);
     $fclose(fd);
     avif.reset_n = 1'b1;
     avif.valid = 1'b0;
+    avif.ready = 1'b1;
     avif.startofpacket = 1'b0;
     avif.endofpacket = 1'b0;
     avif.data = 'b0;

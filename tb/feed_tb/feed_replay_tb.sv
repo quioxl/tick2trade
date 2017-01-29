@@ -19,7 +19,7 @@ module feed_replay_tb ();
                     .in_data           ( avif.data          ),
                     .in_empty          ( avif.empty         ),
                     .in_error          ( 1'b0               ),
-                    .out_ready         ( 1'b1               ),
+                    .out_ready         ( avif.ready         ),
                     .out_valid         (                    ),
                     .out_startofpacket (                    ),
                     .out_endofpacket   (                    ),
