@@ -5,10 +5,12 @@ class all_messages_test extends system_test_base;
     super.new(name,parent);
   endfunction : new
 
+/* -----\/----- EXCLUDED -----\/-----
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     cfg_h.order_cfg_h.stall_frequency = 0;
   endfunction : build_phase
+ -----/\----- EXCLUDED -----/\----- */
 
   virtual task run_phase(uvm_phase phase);
     random_host_program_seq host_seq_h;

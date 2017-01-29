@@ -42,3 +42,19 @@ list:
 
 .PHONY: regression
 regression: clean build $(TESTS) ucdb report
+
+
+
+VISMV_OPTS_0 ?=
+VISMV_OPTS_1 ?= mv qwave.db qwave_$$number.db ;
+VISMV_OPTS ?= $(VISMV_OPTS_$(VIS))
+
+.PHONY: ten_tests
+ten_tests:
+	number=1 ; while [[ $$number -le 10 ]] ; do \
+    echo $$number ; \
+    make all_messages_test SEED=random; \
+    mv all_messages_test.log all_message_test_$$number.log ; \
+    $(VISMV_OPTS) \
+    ((number = number + 1)) ; \
+  done

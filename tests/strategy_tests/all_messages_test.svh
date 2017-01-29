@@ -5,12 +5,12 @@ class all_messages_test extends strategy_test_base;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase(uvm_phase phase);
-    super.build_phase(phase);
+  //virtual function void build_phase(uvm_phase phase);
+  //  super.build_phase(phase);
     //Turn off the new order generator to prevent the RAM from changing
     //cfg_h.enable_new_order_gen = 0;  //FIXME
-    cfg_h.order_cfg_h.stall_frequency = 0;
-  endfunction : build_phase
+    //cfg_h.order_cfg_h.stall_frequency = 0;
+  //endfunction : build_phase
 
   virtual task run_phase(uvm_phase phase);
     random_host_program_seq host_seq_h;
