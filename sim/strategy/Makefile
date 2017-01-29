@@ -20,6 +20,7 @@ BINDS_TOP_1 = binds
 BINDS_TOP   = $(BINDS_TOP_$(USE_BINDS))
 
 
+.PHONY: build
 build: build_avalon build_feed build_symbol_map build_host build_order build_dut
 	vlog $(TICK2TRADE_ROOT_DIR)/tb/strategy_tb/strategy_env_pkg.sv \
        $(TICK2TRADE_ROOT_DIR)/tests/strategy_seqs/strategy_seq_pkg.sv \
@@ -35,4 +36,9 @@ TESTS = sanity_test basic_test all_messages_test
 $(TESTS): 
 	make run TESTNAME=$@
 
+list:
+	@echo "The following tests are available for the Strategy Testbench"
+	@$(foreach test,$(TESTS),echo $(test);)
+
+.PHONY: regression
 regression: clean build $(TESTS) ucdb report

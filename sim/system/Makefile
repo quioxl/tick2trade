@@ -39,6 +39,10 @@ TESTS = sanity_test all_messages_test
 $(TESTS): 
 	make run TESTNAME=$@
 
+list:
+	@echo "The following tests are available for the System Testbench"
+	@$(foreach test,$(TESTS),echo $(test);)
+
 .PHONY: regression
 regression: clean build $(TESTS) ucdb report
 
