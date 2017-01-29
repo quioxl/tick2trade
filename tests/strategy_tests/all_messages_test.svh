@@ -25,7 +25,7 @@ class all_messages_test extends strategy_test_base;
     host_seq_h.start(env_h.host_agent_h.seqr_h);
     feed_seq_h = feed_all_messages_seq::type_id::create("feed_seq_h");
     `uvm_info("MESSAGES", $sformatf("%0d messages will be sent", feed_seq_h.message_count), UVM_LOW)
-    messege_sent_count += feed_seq_h.message_count;
+    message_sent_count += feed_seq_h.message_count;
     feed_seq_h.start(env_h.master_agent_h.seqr_h);
     #1us;
     phase.drop_objection(this);
