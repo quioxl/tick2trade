@@ -54,28 +54,20 @@ class avalon_master_driver extends avalon_driver_base;
       end else begin
         empty = bnum;
       end
-      // Now drive the bus
+      // Now drive the bus, but wait for ready to be high first
+      wait_for_ready();
       foreach (pdata[i]) begin
-        // If target is not ready, advance clock until ready is high and drive valid low
-        if (vif.ready !== 1'b1) begin
-          wait_for_ready();
-          // Once ready has gone high again, drive valid one additional cycle so the 
-          // data that was put on the bus earlier can get picked up.
-          vif.valid <= 1'b1;
-          @(posedge vif.clk);
-        end else begin
-          @(posedge vif.clk);
-        end
-        // Drive valid high and put data on bus
-        vif.valid <= 1'b1;
+        // For each beat, need to do the following (ready may not be high when we start, keep that in mind):
+        // 1. Drive new values on the bus
+        // 1. Check value of ready. If low, maintain bus with valid low until ready goes high, then drive previous values for
+        //    one more cycle with valid high
+        // 4. Move to next loop iteration
         vif.data <= pdata[i];
-        // If first word of data, drive startofpacket
         if (i==0) begin
           vif.startofpacket <= 1'b1;
         end else begin
           vif.startofpacket <= 1'b0;
         end
-        // If last word of data, drive endofpacket and empty field
         if (i==pdata.size()-1) begin
           vif.endofpacket <= 1'b1;
           vif.empty <= empty;
@@ -83,20 +75,23 @@ class avalon_master_driver extends avalon_driver_base;
           vif.endofpacket <= 1'b0;
           vif.empty <= 'b0;
         end
-      end
-      // There is a chance that we got a ready drop on the final beat, EOP=1. If so, need to drive 
-      // valid low for a bit longer.
-      if (vif.ready !== 1'b1) begin
-        wait_for_ready();
+        if (vif.ready !== 1'b1) begin
+          wait_for_ready();
+        end
         vif.valid <= 1'b1;
-      end
-      // Insert delay gap
-      repeat (trans_h.delay_gap) begin
         @(posedge vif.clk);
+      end
+      vif.valid <= 1'b0;
+      vif.endofpacket <= 1'b0;
+      vif.empty <= 'b0;
+      vif.data <= 'b0;
+      vif.startofpacket <= 'b0;
+      repeat (trans_h.delay_gap) begin
         vif.valid <= 1'b0;
         vif.endofpacket <= 1'b0;
         vif.empty <= 'b0;
         vif.data <= 'b0;
+        @(posedge vif.clk);
       end
       seq_item_port.item_done();
     end

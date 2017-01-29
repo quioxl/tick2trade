@@ -25,3 +25,8 @@ $(TESTS):
 	make run TESTNAME=$@
 
 regression: clean build $(TESTS) ucdb report
+
+replay: build
+	vlog $(TICK2TRADE_ROOT_DIR)/tb/feed_tb/feed_replay_tb.sv
+	vopt feed_replay_tb -o replay_tb_opt +acc
+	vsim replay_tb_opt -onfinish stop
