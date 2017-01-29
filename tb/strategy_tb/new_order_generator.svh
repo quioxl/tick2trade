@@ -8,6 +8,8 @@ class new_order_generator extends uvm_subscriber #(order_item);
   host_symbol_seq symbol_seq_h;
   uvm_sequencer #(host_item) host_seqr_h;
 
+  int symbols_reprogrammed = 0;
+
   //Methods
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -39,8 +41,14 @@ class new_order_generator extends uvm_subscriber #(order_item);
           `uvm_fatal("SEQ","Sequence randomization failed")
         end
         symbol_seq_h.start(host_seqr_h);
+        symbols_reprogrammed++;
       end while (outstanding_symbols.size() != 0);
     end // forever begin
   endtask : run_phase
+
+  function void report_phase(uvm_phase phase);
+    super.report_phase(phase);
+    `uvm_info("NEW_ORDER_GEN", $sformatf("The strategy RAM was reprogrammed %0d times", symbols_reprogrammed), UVM_LOW)
+  endfunction : report_phase
   
 endclass : new_order_generator

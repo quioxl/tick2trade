@@ -20,6 +20,7 @@ class all_messages_test extends strategy_test_base;
     host_seq_h = random_host_program_seq::type_id::create("host_seq_h");
     //Program 100 symbols
     host_seq_h.trans_count = 100;
+    symbols_programmed = host_seq_h.trans_count;
     `uvm_info("MESSAGES", $sformatf("%0d symbols will be programmed in strategy RAM", host_seq_h.trans_count), UVM_LOW)
     host_seq_h.start(env_h.host_agent_h.seqr_h);
     feed_seq_h = feed_all_messages_seq::type_id::create("feed_seq_h");

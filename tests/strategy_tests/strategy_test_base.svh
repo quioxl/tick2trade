@@ -1,6 +1,7 @@
 class strategy_test_base extends uvm_test;
   `uvm_component_utils(strategy_test_base)
 
+  int symbols_programmed = 0;
   int messege_sent_count = 0;
 
   strategy_env env_h;
@@ -32,9 +33,19 @@ class strategy_test_base extends uvm_test;
 
   function void report_phase(uvm_phase phase);
     string message;
+    uvm_report_server serv = uvm_report_server::get_server();
+    
     super.report_phase(phase);
-    $sformat(message, "\n-------------------------------------\nMessages Sent In           : %0d\nMessages Discarded          : %0d\nOrders Compared Successfully: %0d\nOrders Miscompared          : %0d\n-------------------------------------\n", messege_sent_count, env_h.predictor_h.discarded.sum(), env_h.scoreboard_h.compare_count, env_h.scoreboard_h.miscompare_count);
-    if (messege_sent_count == (env_h.predictor_h.discarded.sum() + env_h.scoreboard_h.compare_count))
+    $sformat(message, "\n-------------------------------------\nSymbols Programmed  : %6d\nSymbols Reprogrammed: %6d", symbols_programmed, ((cfg_h.enable_new_order_gen) ? env_h.new_order_gen_h.symbols_reprogrammed : 0) );
+    $sformat(message, "\n-------------------------------------\nSymbols Programmed  : %6d\nSymbols Reprogrammed: %6d\n-------------------------------------\nMessages Sent In            : %6d\nMessages Discarded          : %6d\nOrders Compared Successfully: %6d\nOrders Miscompared          : %6d\n-------------------------------------\n", symbols_programmed, ((cfg_h.enable_new_order_gen) ? env_h.new_order_gen_h.symbols_reprogrammed : 0), messege_sent_count, env_h.predictor_h.discarded.sum(), env_h.scoreboard_h.compare_count, env_h.scoreboard_h.miscompare_count);
+    //Total messages sent should equal the total discarded + the total number
+    // of orders
+    // Additionally, the total number or reprograms should equal the total
+    // number of orders
+    if ((serv.get_severity_count(UVM_FATAL) == 0) && 
+        (serv.get_severity_count(UVM_ERROR) == 0) &&
+        (env_h.scoreboard_h.miscompare_count == 0) && (messege_sent_count == (env_h.predictor_h.discarded.sum() + env_h.scoreboard_h.compare_count)) &&
+        ( (cfg_h.enable_new_order_gen) ? (env_h.new_order_gen_h.symbols_reprogrammed == env_h.scoreboard_h.compare_count) : 1) )
       $sformat(message, "%s               PASSED\n-------------------------------------", message);
     else
       $sformat(message, "%s               FAILED\n-------------------------------------", message);

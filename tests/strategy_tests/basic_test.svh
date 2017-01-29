@@ -18,6 +18,7 @@ class basic_test extends strategy_test_base;
     
     super.run_phase(phase);
     host_seq_h = incr_host_program_seq::type_id::create("host_seq_h");
+    symbols_programmed = host_seq_h.trans_count;
     host_seq_h.start(env_h.host_agent_h.seqr_h);
     feed_sym_seq_h = feed_symbol_match_seq::type_id::create("feed_sym_seq_h");
     feed_sym_seq_h.trans_count = 20;
