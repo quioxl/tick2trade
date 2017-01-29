@@ -6,9 +6,10 @@ class strategy_env extends uvm_env;
   avalon_agent master_agent_h;
   host_agent   host_agent_h;
   order_agent  order_agent_h;
-  strategy_predictor predictor_h;
+  strategy_predictor  predictor_h;
   strategy_scoreboard scoreboard_h;
   new_order_generator new_order_gen_h;
+  strategy_coverage   coverage_h;
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -34,6 +35,7 @@ class strategy_env extends uvm_env;
     scoreboard_h = strategy_scoreboard::type_id::create("scoreboard_h",this);
     if (cfg_h.enable_new_order_gen)
       new_order_gen_h = new_order_generator::type_id::create("new_order_gen_h",this);
+    coverage_h = strategy_coverage::type_id::create("coverage_h", this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
@@ -50,6 +52,11 @@ class strategy_env extends uvm_env;
       new_order_gen_h.host_seqr_h = host_agent_h.seqr_h;
       order_agent_h.ap.connect(new_order_gen_h.analysis_export);
     end
+
+    //Connect Coverage Collector
+    master_agent_h.ap.connect(coverage_h.feed_export);
+    host_agent_h.mon_out_ap.connect(coverage_h.host_export);
+    order_agent_h.ap.connect(coverage_h.order_export);
     
   endfunction
 

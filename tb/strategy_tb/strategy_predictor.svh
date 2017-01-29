@@ -5,17 +5,17 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
   int          discarded[string];
 
-  function new(string name, uvm_component parent);
-    super.new(name,parent);
-  endfunction
-
-  //strategy_message_item strategy_trans_h;
+  //TLM ports & imps
   uvm_analysis_imp_host #(host_item, strategy_predictor) host_export;
   uvm_analysis_port #(order_item) ap;
 
   //Structures for holding information programed into the host interface ram
   host_order_t temp_order;
   host_order_t orders[symbol_t];
+
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+  endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);

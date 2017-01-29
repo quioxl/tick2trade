@@ -22,12 +22,15 @@ package strategy_env_pkg;
   //Imp decls
   `uvm_analysis_imp_decl(_STRATEGY_ACTUAL)
   `uvm_analysis_imp_decl(_STRATEGY_EXPECT)
+  `uvm_analysis_imp_decl(_feed)
   `uvm_analysis_imp_decl(_host)
+  `uvm_analysis_imp_decl(_order)
 
   //Classes
   `include "strategy_env_config.svh"
   `include "strategy_predictor.svh"
   `include "strategy_scoreboard.svh"
+  `include "strategy_coverage.svh"
   `include "new_order_generator.svh"
   `include "strategy_env.svh"
   
