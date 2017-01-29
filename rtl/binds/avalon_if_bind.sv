@@ -8,15 +8,15 @@
 // If we're using the simulator, use UVM reporting structure. Otherwise, just use $error calls
 `ifdef SIM_ONLY
   import uvm_pkg::*;
-  `define assert_prop_default(check, pa, msg) \
+  `define assert_prop_default_avl(check, pa, msg) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else \
                                     uvm_report_error("avalon_if_bind", $sformatf("(%m) %s : %s",`"``check``: `",msg));
 
-  `define assert_prop_clkrst(check, pa, msg, dc, clk) \
+  `define assert_prop_clkrst_avl(check, pa, msg, dc, clk) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (dc) (pa)) else \
                                     uvm_report_error("avalon_if_bind", $sformatf("(%m) %s : %s",`"``check``: `",msg));
 `else
-  `define assert_prop_default(check, pa, msg) \
+  `define assert_prop_default_avl(check, pa, msg) \
    ERROR_``check``: assert property (@(posedge clk) disable iff (!reset_n) (pa)) else $error("%s",{`"``check``: `",msg});
 `endif
 
@@ -110,22 +110,22 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
   //------------------------------------------------------------------------------------
 
   // Error signal should never go high in this environment
-  `assert_prop_default(assert_invalid_error,
+  `assert_prop_default_avl(assert_invalid_error,
                       (!error),
                       "Error asserted")
 
   // ReadLatency of 1, i.e. if ready goes low, valid must drop one cycle later
-  `assert_prop_default(valid_deassert,
+  `assert_prop_default_avl(valid_deassert,
                       (!ready |-> ##1 !valid),
                       "Valid did not de-assert the clock after read de-asserted")
 
   // Problem if we see EOP rise unless we are in a packet
-  `assert_prop_default(invalid_eop,
+  `assert_prop_default_avl(invalid_eop,
                       ((endofpacket && valid) |->  (in_pkt || startofpacket)),
                       "EOP asserted while not in packet")
 
   // Problem if we see valid active unless we are in a packet or we're starting a packet
-  `assert_prop_default(invalid_valid,
+  `assert_prop_default_avl(invalid_valid,
                       (valid |-> (in_pkt || startofpacket)),
                       "Valid asserted outside of packet")
 
