@@ -52,7 +52,7 @@ module tb;
     .out_error          ( avl_slave_if.error          )
   );
 
-  feed_recorder U_recorder (.master_if(avl_master_if));
+  avalon_recorder U_recorder (.avif(avl_master_if));
 
   initial begin
     $timeformat(-9,5,"ns",7);

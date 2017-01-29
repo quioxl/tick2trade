@@ -49,4 +49,7 @@ module tb;
     run_test();
   end
 
+  avalon_recorder U_avl_recorder (.avif(feed_if));
+  host_recorder U_hst_recorder (.hif(host_if));
+
 endmodule

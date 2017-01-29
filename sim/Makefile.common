@@ -57,7 +57,9 @@ build_dut:
 build_avalon: 
 	vlog $(TICK2TRADE_ROOT_DIR)/rtl/top/t2t_pkg.sv \
                 $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
-		$(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv 
+		$(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_pkg.sv \
+    $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_recorder.sv \
+    $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_replay.sv
 
 ## Feed agent package (layered on top of avalon agent)
 build_feed: build_avalon build_symbol_map
@@ -66,7 +68,9 @@ build_feed: build_avalon build_symbol_map
 ## Host interface package
 build_host:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_interface.sv \
-		$(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_agent_pkg.sv
+		$(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_agent_pkg.sv \
+    $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_recorder.sv \
+    $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_replay.sv
 
 ## Symbol mapper package
 build_symbol_map:
