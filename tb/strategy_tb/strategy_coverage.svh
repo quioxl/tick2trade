@@ -16,9 +16,15 @@ class strategy_coverage extends uvm_component;
     SIZE: coverpoint feed_item_h.payload.size()
       {
        illegal_bins too_small = {[0:7]};
-       bins         valid[]   = {[8:32]};
+       bins         size[]    = {[8:32]};
        illegal_bins too_large = {[33:$]};
        }
+    TYPE: coverpoint {feed_item_h.payload[0], feed_item_h.payload[1], feed_item_h.payload[2]}
+      {
+       bins NEW = {"NEW"};
+       bins others = {[0:("NEW"-1)],[("NEW"+1):24'hffffff]};
+      }
+    SIZE_TYPE: cross SIZE, TYPE;
   endgroup : feed_items
   
   //Methods
