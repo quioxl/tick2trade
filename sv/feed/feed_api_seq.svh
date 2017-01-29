@@ -23,7 +23,7 @@ class feed_api_seq extends uvm_sequence #(avalon_message_item);
     feed_message_item feed_h;
     msg_h = avalon_message_item::type_id::create("msg_h");
     feed_h = feed_message_item::type_id::create("feed_h");
-    repeat (message_count) begin
+    for (int ii = 0; ii < message_count; ii++) begin
       start_item(msg_h);
       randcase
         feed_message_freq : begin
@@ -35,7 +35,9 @@ class feed_api_seq extends uvm_sequence #(avalon_message_item);
             `uvm_fatal("SEQ","Randomization of msg_h failed")
           end
         end
-      endcase
+      endcase // randcase
+      if (ii == message_count - 1)
+        msg_h.send_now = 1;
       finish_item(msg_h);
     end
   endtask

@@ -11,6 +11,8 @@ class feed_streaming_monitor extends uvm_component;
 
   virtual avalon_if vif;
 
+  int     msg_cnt = 0;
+  
   function void build_phase(uvm_phase phase);
     ap = new("ap",this);
     if (cfg_h == null) begin
@@ -43,6 +45,7 @@ class feed_streaming_monitor extends uvm_component;
       full_msg.push_back(p.pop_front());
     end
     trans_h.payload = full_msg;
+    msg_cnt++;
     ap.write(trans_h);
   endfunction
 
@@ -92,6 +95,11 @@ class feed_streaming_monitor extends uvm_component;
       end
       p = {};
     end
-  endtask
+  endtask : run_phase
+
+  function void report_phase(uvm_phase phase);
+    super.report_phase(phase);
+    `uvm_info("FEED_STREAMING_MON", $sformatf("Discovered and Passed On %0d Messages", msg_cnt), UVM_LOW) 
+  endfunction : report_phase
 
 endclass
