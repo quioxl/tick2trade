@@ -45,8 +45,9 @@ VOPT_OPT_ARGS ?= $(VOPT_OPT_ARGS_$(VIS))
 VOPT_DBG_ARGS ?= +acc
 
 ## Delete all generated files
+.PHONY: clean
 clean:
-	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave.db \
+	rm -rf *.ucdb *.log *~ *.bak work transcript *.wlf design.bin qwave*.db \
     certe_dump.xml *.vstf *.vcd *_record.txt coverage .visualizer covhtmlreport
 
 ## Compile the RTL - a design.f file contains list of requisite files to compile. That file
@@ -55,6 +56,7 @@ build_dut:
 	vlog -f $(TICK2TRADE_ROOT_DIR)/rtl/design.f
 
 ## Avalon agent package
+.PHONY: build_avalon
 build_avalon: 
 	vlog $(TICK2TRADE_ROOT_DIR)/rtl/top/t2t_pkg.sv \
                 $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_if.sv \
@@ -63,10 +65,12 @@ build_avalon:
     $(TICK2TRADE_ROOT_DIR)/sv/avalon/avalon_replay.sv
 
 ## Feed agent package (layered on top of avalon agent)
+.PHONY: build_feed
 build_feed: build_avalon build_symbol_map
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/feed/feed_agent_pkg.sv
 
 ## Host interface package
+.PHONY: build_host
 build_host:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_interface.sv \
 		$(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_agent_pkg.sv \
@@ -74,28 +78,34 @@ build_host:
     $(TICK2TRADE_ROOT_DIR)/sv/host_agent/host_replay.sv
 
 ## Symbol mapper package
+.PHONY: build_symbol_map
 build_symbol_map:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/extras/symbol_map_pkg.sv
 
 ## Order message output agent
+.PHONY: build_order
 build_order:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/order/order_interface.sv $(TICK2TRADE_ROOT_DIR)/sv/order/order_pkg.sv
 
 ## Run target, common across all benches. Invokes simulator
+.PHONY: build_run
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) \
     +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) \
     -l $(TESTNAME).log -classdebug -assertdebug $(EXTRA_SIM_ARGS)
 
 ## Generate a UCDB (coverage database) for any simulations that have been run so far
+.PHONY: build_ucdb
 ucdb:
 	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log
 
 ## Generate HTML report based on UCDB
+.PHONY: build_report
 report:
 	vcover report -html final.ucdb
 
 ## Visualizer Debug environment
+.PHONY: vis
 vis:
 	visualizer -designfile design.bin -wavefile qwave.db
 
