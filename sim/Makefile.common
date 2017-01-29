@@ -24,6 +24,9 @@ VISRUN_OPTS ?= $(VISRUN_OPTS_$(VIS))
 ## Verbosity level
 VERBOSITY ?= UVM_MEDIUM
 
+## Dofile for debug simulation
+DOFILE ?= ../default.do
+
 ## Coverage options
 COVERAGE ?= 1
 VSIM_COVERAGE_0 =
@@ -32,9 +35,7 @@ VSIM_COVERAGE = $(VSIM_COVERAGE_$(COVERAGE))
 
 ## Simulator options depend on whether or not DEBUG is desired or not
 VSIM_OPTS_0 = -c -do "run -a;quit" -uvmcontrol=none $(VISRUN_OPTS) tb_opt
-VSIM_OPTS_1 = -onfinish stop -uvmcontrol=all tb_dbg \
-  -do "set WildcardFilter [lsearch -not -all -inline $WildcardFilter Assertion]; \
-    log -r /*; do $(WAVEFILE); run 0" 
+VSIM_OPTS_1 = -onfinish stop -uvmcontrol=all tb_dbg -do $(DOFILE) -do $(WAVEFILE) 
 VSIM_OPTS = $(VSIM_OPTS_$(DEBUG))
 
 ## Optimization options depend on DEBUG and VIS
