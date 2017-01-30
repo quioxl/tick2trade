@@ -30,12 +30,16 @@ module tick2trade #(
 ) (
 
   // Clk/Reset
-  input                                 clk,                       // Core clock
-  input                                 reset_n,                   // Core reset
+  input                clk,                // Core clock
+  input                reset_n,            // Active low core reset
 
-  avalon_if                             dec_in_if,                // Feed Decoder input IF (Avalon)
-  host_interface                        host_if,                  // Host Config input IF
-  order_interface                       order_if                  // Order output IF
+  input                aclk,               // Host Asynch Clk
+  input                areset_n,           // Host Asycn Reset
+
+  // Interfaces
+  avalon_if            dec_in_if,          // Feed Decoder input IF (Avalon)
+  host_interface       host_if,            // Host Config input IF
+  order_interface      order_if            // Order output IF
 
   );
 
@@ -106,13 +110,15 @@ module tick2trade #(
   )tts_i (
 
     // Clock/Reset
-    .clk                ( clk               ),
-    .reset_n            ( reset_n           ),
+    .clk                ( clk      ),
+    .reset_n            ( reset_n  ),
+    .aclk               ( aclk     ),
+    .areset_n           ( areset_n ),
 
-    .dec_if             ( dec_if            ),
-
-    .host_if            ( host_if           ),
-    .order_if           ( order_if          )
+    // Interfaces
+    .dec_if             ( dec_if    ),
+    .host_if            ( host_if   ),
+    .order_if           ( order_if  )
 
   );
 

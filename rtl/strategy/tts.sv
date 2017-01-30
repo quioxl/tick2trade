@@ -32,9 +32,14 @@ module tts
   parameter ORCB_ADDR_WIDTH    = 14
 
 ) (
+  // Clk/Reset
   input                clk,                // Core clock
   input                reset_n,            // Active low core reset
 
+  input                aclk,               // Host Asynch Clk
+  input                areset_n,           // Host Asycn Reset
+
+  // Interfaces
   avalon_if            dec_if,
   host_interface       host_if,
   order_interface      order_if
@@ -84,8 +89,8 @@ module tts
     .clk                (clk),
     .reset_n            (reset_n),
 
-    .aclk               (clk), //FIXME
-    .areset_n           (reset_n), //FIXME
+    .aclk               (aclk),
+    .areset_n           (areset_n),
 
     .host_if            (host_if),
 
