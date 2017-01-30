@@ -102,7 +102,7 @@ ucdb:
 ## Generate HTML report based on UCDB
 .PHONY: report
 report:
-	vcover report -html final.ucdb
+	vcover report -html final.ucdb -details
 
 ## Visualizer Debug environment
 .PHONY: vis
