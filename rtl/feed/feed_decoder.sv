@@ -127,9 +127,8 @@ module feed_decoder #(
   //             if get_new_beat isn't set.
   always @(posedge clk) begin
     if      (!reset_n)             ld_from_shadow <= 1'b0;
-    else if (in_valid & !in_ready) ld_from_shadow <= 1'b1;
-    // Should be able to clear on the next cycle
-    else                           ld_from_shadow <= 1'b0;
+    else if (in_valid && !in_ready && new_beat.vld) ld_from_shadow <= 1'b1;
+    else if (get_new_beat)         ld_from_shadow <= 1'b0;
   end
 
   // This is the data queue everything is pulled from. It can be visualized
@@ -285,7 +284,7 @@ module feed_decoder #(
   // 2. An eom is going out AND
   //    the eom_ptr is not at the end of the queue.
   // If the read pointer is too far down, then need a delayed load
-  assign ld_ptrs     = new_beat.sop | (eom_nxt & !eom_at_end) | dly_ld;
+  assign ld_ptrs     = new_beat.sop | (((eom_nxt & vld_nxt & !eom_at_end) | dly_ld) & out_ready);
 
   // The delayed load allows a pointer far down in the new queue
   // to propagate to the new queue before loading the pointers.
