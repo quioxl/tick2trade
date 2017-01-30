@@ -56,4 +56,14 @@ package t2t_pkg;
   // Message Type encoding
   parameter  MSG_NEW           = 24'h4E_45_57; // ASCII "NEW"
 
+  // ------------------------------------------------------------
+  // packet structure
+  // ------------------------------------------------------------
+  typedef struct packed {
+    logic      valid;
+    logic      sop;
+    logic      eop;
+    t_dec_msg  data;
+  } t_avalon_msg;
+
 endpackage

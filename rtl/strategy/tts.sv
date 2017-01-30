@@ -45,6 +45,15 @@ module tts
   order_interface      order_if
 );
 
+  // Decode Shadow register interface
+  avalon_if #(.DATA_WIDTH  (MSG_WIDTH),
+              .EMPTY_WIDTH ($clog2(MSG_WIDTH))
+             ) dec_shdw_if();
+
+  avalon_if #(.DATA_WIDTH  (MSG_WIDTH),
+              .EMPTY_WIDTH ($clog2(MSG_WIDTH))
+             ) curr_dec_if();
+
   // Symbol RCB RAM Interface
   hpb_if    #(.RCB_RAM_ADDR_WIDTH(SRCB_ADDR_WIDTH),
               .RCB_RAM_WIDTH(SRCB_RAM_WIDTH)
@@ -66,6 +75,7 @@ module tts
              ) orcb_hpb_if();
 
     reg          tts_sym_vld;
+    reg          use_shdw;
     reg  [13 :0] tts_rd_addr;
     reg  [2  :0] sym_idx;
 
@@ -78,7 +88,43 @@ module tts
     wire [127:0] prcb_data, orcb_data;
 
   //------------------------------------------------------------------------------------------------------------------
-  // HDP
+  // Shadow the incoming decode interface for ready absorbtion
+  //------------------------------------------------------------------------------------------------------------------
+  always_ff @(posedge clk) begin
+    if          (!reset_n) begin
+      dec_shdw_if.ready         <= 1'b0;
+      dec_shdw_if.valid         <= 1'b0;
+      dec_shdw_if.startofpacket <= 1'b0;
+      dec_shdw_if.endofpacket   <= 1'b0;
+      dec_shdw_if.data          <= 1'b0;
+      dec_shdw_if.empty         <= 1'b0;
+    end else if (dec_if.valid) begin
+      dec_shdw_if.ready         <= dec_if.ready;
+      dec_shdw_if.valid         <= dec_if.valid;
+      dec_shdw_if.startofpacket <= dec_if.startofpacket;
+      dec_shdw_if.endofpacket   <= dec_if.endofpacket;
+      dec_shdw_if.data          <= dec_if.data;
+      dec_shdw_if.empty         <= dec_if.empty;
+    end
+  end
+
+  // Always expect valid deassertion to follow ready deasertion
+  always_ff @(posedge clk) begin
+    if      (!reset_n)                     use_shdw <= 1'b0;
+    else if (dec_if.valid & !dec_if.ready) use_shdw <= 1'b1;
+    else                                   use_shdw <= 1'b0;
+  end
+
+  assign curr_dec_if.ready         = use_shdw ? dec_shdw_if.ready         : dec_if.ready;
+  assign curr_dec_if.valid         = use_shdw ? dec_shdw_if.valid         : dec_if.valid;
+  assign curr_dec_if.startofpacket = use_shdw ? dec_shdw_if.startofpacket : dec_if.startofpacket;
+  assign curr_dec_if.endofpacket   = use_shdw ? dec_shdw_if.endofpacket   : dec_if.endofpacket;
+  assign curr_dec_if.data          = use_shdw ? dec_shdw_if.data          : dec_if.data;
+  assign curr_dec_if.empty         = use_shdw ? dec_shdw_if.empty         : dec_if.empty;
+
+  //------------------------------------------------------------------------------------------------------------------
+  // HPB (Host Protocol Block)
+  // Responsible for converting host requests into RAM writes
   //------------------------------------------------------------------------------------------------------------------
   hpb # (
    .HPB_DATA_WIDTH      ( HPB_DATA_WIDTH ),
@@ -102,7 +148,8 @@ module tts
   );
 
   //------------------------------------------------------------------------------------------------------------------
-  // FSM
+  // SEF (Strategy Execution FSM)
+  // Controls RAM reads and final trade execution
   //------------------------------------------------------------------------------------------------------------------
   sef sef_i (
     // Clk/Reset
@@ -110,7 +157,7 @@ module tts
     .reset_n           (reset_n),
 
     // Feed Decoder IF
-    .dec_if            (dec_if),
+    .dec_if            (curr_dec_if),
 
     // Symbol ID RCB
     .sef_rd_srcb       (sef_rd_srcb),
@@ -127,6 +174,7 @@ module tts
     .sef_vcmp_load_b   (sef_vcmp_load_b),
 
     // Order RCB
+    .order_if_ready    (order_if.ready),
     .sef_rd_orcb       (sef_rd_orcb),
     .sef_out_valid     (sef_out_valid)
 );
@@ -147,7 +195,7 @@ module tts
     .clk                (clk),
     .reset_n            (reset_n),
 
-    .t2t_rd_addr        (dec_if.dec_data.beat1.symid[13:0]),  // Read address is the Symbol ID
+    .t2t_rd_addr        (curr_dec_if.dec_data.beat1.symid[13:0]),  // Read address is the Symbol ID
     .sef_read           (sef_rd_srcb),
 
     .rcb_data           (srcb_data),
@@ -162,7 +210,7 @@ module tts
   // and the byte muxing done prior to the register
   always @(posedge clk) begin
     if      (!reset_n)    sym_idx <= 2'b00;
-    else if (sef_rd_srcb) sym_idx <= dec_if.dec_data.beat1.symid[15:14];
+    else if (sef_rd_srcb) sym_idx <= curr_dec_if.dec_data.beat1.symid[15:14];
   end
 
   always_comb begin
@@ -191,7 +239,9 @@ module tts
   end
 
   //------------------------------------------------------------------------------------------------------------------
-  // Price RCB
+  // Price Path
+  // Responsible for reading out price parameters from its RAM and 
+  // comparing against the incoming price field
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_RAM_ADDR_WIDTH ( PRCB_ADDR_WIDTH ),
@@ -224,7 +274,7 @@ module tts
     .reset_n          (reset_n),
 
     .rcb_data         (prcb_data),
-    .tts_field        ({dec_if.dec_data.beat1.price_up, dec_if.dec_data.beat2.price_dn}),
+    .tts_field        ({curr_dec_if.dec_data.beat1.price_up, curr_dec_if.dec_data.beat2.price_dn}),
 
     .sef_load_a       (sef_pcmp_load_a),
     .sef_load_b       (sef_pcmp_load_b),
@@ -234,7 +284,9 @@ module tts
   );
 
   //------------------------------------------------------------------------------------------------------------------
-  // Volume RCB
+  // Volume Path
+  // Responsible for reading the volume parameters from the VRCB
+  // and comparing against the incoming Volume field
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_RAM_ADDR_WIDTH (VRCB_ADDR_WIDTH ),
@@ -267,7 +319,7 @@ module tts
     .reset_n          (reset_n),
 
     .rcb_data         (vrcb_data),
-    .tts_field        ({dec_if.dec_data.beat2.vol_up, dec_if.dec_data.beat3.vol_dn}),
+    .tts_field        ({curr_dec_if.dec_data.beat2.vol_up, curr_dec_if.dec_data.beat3.vol_dn}),
 
     .sef_load_a       (sef_vcmp_load_a),
     .sef_load_b       (sef_vcmp_load_b),
@@ -277,7 +329,10 @@ module tts
   );
 
   //------------------------------------------------------------------------------------------------------------------
-  // Order RCB
+  // Order Path
+  // Responsible from reading the Order information from
+  // The ORCB and sending onto the Order interface
+  // if all conditions are met.
   //------------------------------------------------------------------------------------------------------------------
   rcb # (
    .RCB_RAM_ADDR_WIDTH (ORCB_ADDR_WIDTH ),
@@ -297,9 +352,6 @@ module tts
 
   );
 
-  // FIXME : Right now this always drives valid regardless
-  //         of ready. Need to add a shadow register to hold
-  //         valid if ready deasserts
   always @(posedge clk) begin
     if (!reset_n) begin
       order_if.valid <= 1'b0;

@@ -21,8 +21,8 @@ module sef
   avalon_if      dec_if,
 
   // Symbol ID RCB
-  output bit     sef_rd_srcb,
-  input  bit     tts_sym_vld,
+  output bit        sef_rd_srcb,
+  input  bit        tts_sym_vld,
 
   // Price Path (RCB & CMP)
   output bit     sef_rd_prcb,
@@ -35,6 +35,7 @@ module sef
   output bit     sef_vcmp_load_b,
 
   // Order RCB
+  input  bit     order_if_ready,
   output bit     sef_rd_orcb,
   output bit     sef_out_valid
 );
@@ -56,9 +57,12 @@ module sef
   assign sef_vcmp_load_b = (state == CMP);
 
   assign sef_rd_orcb     = (state == LD);
-  assign sef_out_valid   = (state == CMP);
+  assign sef_out_valid   = (state == CMP) & dec_if.ready ;
 
   assign new_msg = dec_if.valid & dec_if.startofpacket & (dec_if.dec_data.beat1.msg_type == MSG_NEW);
+
+  // A valid cycle with no ready will be caught in the shadow registers.
+  assign advance = dec_if.valid & order_if.ready;
 
   always @(posedge clk) begin
     if (!reset_n)                        state <= WAIT;
@@ -70,11 +74,11 @@ module sef
                   end
         LD      : begin
                   if      (!tts_sym_vld) state <= WAIT; // If there isn't a valid symbol ID translation, abort
-                  else if (dec_if.valid) state <= CMP;
+                  else if (advance)      state <= CMP;
                   else                   state <= LD;
                   end
         CMP     : begin
-                  if (dec_if.valid)      state <= WAIT;
+                  if (advance)           state <= WAIT;
                   else                   state <= CMP;
                   end
         default :                        state <= WAIT;

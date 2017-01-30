@@ -13,13 +13,14 @@ module avalon_recorder #(parameter string fname = "avalon_record.txt") (avalon_i
   end
 
   always @(avif.clk) begin
-    $fwrite(fd,"%0d:%b %b %b %b %b %b\n",count++,
-                                         avif.reset_n,
-                                         avif.valid,
-                                         avif.startofpacket,
-                                         avif.endofpacket,
-                                         avif.data,
-                                         avif.empty);
+    $fwrite(fd,"%0d:%b %b %b %b %b %b %b\n",count++,
+                                            avif.reset_n,
+                                            avif.valid,
+                                            avif.ready,
+                                            avif.startofpacket,
+                                            avif.endofpacket,
+                                            avif.data,
+                                            avif.empty);
   end
 
 endmodule

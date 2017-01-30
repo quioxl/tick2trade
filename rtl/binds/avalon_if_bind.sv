@@ -61,7 +61,7 @@ interface avalon_if_bind #( parameter DATA_WIDTH = 64,
     if (!reset_n) begin
       in_pkt <= 1'b0;
     end else begin
-      if (valid && ready) begin
+      if (valid) begin
         if (startofpacket && !in_pkt) begin
           in_pkt <= 1'b1;
         end else if (in_pkt && endofpacket) begin
