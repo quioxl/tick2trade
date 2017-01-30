@@ -28,12 +28,7 @@ module tb;
   assign avl_slave_if.reset_n = reset_n;
 
   // DUT Instantiation
-  feed_decoder #(.C_PKT_BEAT_BYTES(8),
-                 .C_PKT_MAX_BYTES(1500),
-                 .C_MSG_CNT_BYTES(2),
-                 .C_MSG_LEN_BYTES(2),
-                 .C_MSG_MIN_BYTES(8),
-                 .C_MSG_MAX_BYTES(32)) DUT (
+  feed_decoder DUT      (
     .clk                ( clk                         ),
     .reset_n            ( reset_n                     ),
     .in_ready           ( avl_master_if.ready         ),
