@@ -88,19 +88,19 @@ build_order:
 	vlog $(TICK2TRADE_ROOT_DIR)/sv/order/order_interface.sv $(TICK2TRADE_ROOT_DIR)/sv/order/order_pkg.sv
 
 ## Run target, common across all benches. Invokes simulator
-.PHONY: build_run
+.PHONY: run
 run: 
 	vsim -solvefaildebug +UVM_TESTNAME=$(TESTNAME) $(VSIM_OPTS) \
     +UVM_VERBOSITY=$(VERBOSITY) -sv_seed $(SEED) $(VSIM_COVERAGE) \
     -l $(TESTNAME).log -classdebug -assertdebug $(EXTRA_SIM_ARGS)
 
 ## Generate a UCDB (coverage database) for any simulations that have been run so far
-.PHONY: build_ucdb
+.PHONY: ucdb
 ucdb:
 	vcover merge -out final.ucdb ./coverage -l ucdb_merge.log
 
 ## Generate HTML report based on UCDB
-.PHONY: build_report
+.PHONY: report
 report:
 	vcover report -html final.ucdb
 

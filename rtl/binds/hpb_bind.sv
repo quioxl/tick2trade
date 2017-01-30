@@ -40,7 +40,7 @@ interface hpb_bind #(
    input                      clk,
    input                      reset_n,
    input    t_host_msg_map    host_msg_map,
-   host_interface             host_interface_synced
+   host_interface             host_sync_if
 );
 
   reg config_vld_q;
@@ -50,7 +50,7 @@ interface hpb_bind #(
     if (!reset_n) begin
       config_vld_q <= 1'b0;
     end else begin
-      config_vld_q <= host_interface_synced.in_config_valid;
+      config_vld_q <= host_sync_if.in_config_valid;
     end
 
   end

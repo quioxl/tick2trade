@@ -20,8 +20,16 @@ class strategy_env_config extends uvm_object;
     wait(master_cfg_h.vif.reset_n == 1'b1);
   endtask
 
-  task wait_for_clocks(int count);
+  task wait_for_clocks(int count = 1);
     repeat (count) @(posedge master_cfg_h.vif.clk);
+  endtask
+
+  task wait_for_reset_host();
+    wait(host_cfg_h.host_intf.reset_n == 1'b1);
+  endtask
+
+  task wait_for_clocks_host(int count = 1);
+    repeat (count) @(posedge host_cfg_h.host_intf.clk);
   endtask
 
   static function strategy_env_config get_config (uvm_component comp, string name = "strategy_env_config");

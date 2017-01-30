@@ -24,6 +24,14 @@ class system_env_config extends uvm_object;
     repeat (count) @(posedge master_cfg_h.vif.clk);
   endtask
 
+  task wait_for_reset_host();
+    wait(host_cfg_h.host_intf.reset_n == 1'b1);
+  endtask
+
+  task wait_for_clocks_host(int count = 1);
+    repeat (count) @(posedge host_cfg_h.host_intf.clk);
+  endtask
+
   static function system_env_config get_config (uvm_component comp, string name = "system_env_config");
     system_env_config cfg_h;
     if (!uvm_config_db#(system_env_config)::get(comp,"",name,cfg_h)) begin

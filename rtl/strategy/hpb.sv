@@ -98,14 +98,16 @@ module hpb
       prcb_hpb_if.hpb_wr_req = 'b0;
       vrcb_hpb_if.hpb_wr_req = 'b0;
       orcb_hpb_if.hpb_wr_req = 'b0;
-    end else if (host_sync_if.in_config_valid && !host_sync_if.in_config_accept) begin
+    //end else if (host_sync_if.in_config_valid && !host_sync_if.in_config_accept) begin
+    end else if (host_sync_if.in_config_valid) begin
       case (ram_select)
         tts_pkg::SRCB: srcb_hpb_if.hpb_wr_req <= 'b1;
         tts_pkg::PRCB: prcb_hpb_if.hpb_wr_req <= 'b1;
         tts_pkg::VRCB: vrcb_hpb_if.hpb_wr_req <= 'b1;
         tts_pkg::ORCB: orcb_hpb_if.hpb_wr_req <= 'b1;
       endcase
-    end else if (host_sync_if.in_config_valid && host_sync_if.in_config_accept) begin
+    //end else if (host_sync_if.in_config_valid && host_sync_if.in_config_accept) begin
+    end else if (host_sync_if.in_config_accept) begin
       case (ram_select)
         tts_pkg::SRCB: srcb_hpb_if.hpb_wr_req <= 'b0;
         tts_pkg::PRCB: prcb_hpb_if.hpb_wr_req <= 'b0;

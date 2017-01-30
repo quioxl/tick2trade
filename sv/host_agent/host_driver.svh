@@ -54,8 +54,10 @@ class host_driver extends uvm_driver #(host_item);
       host_interface_h.in_config_valid <= 1;
       host_interface_h.in_config_data  <= transaction_h.data;
       //Could add a timeout on the accept signal
-      while (host_interface_h.in_config_accept !== 1)
+      while (host_interface_h.in_config_accept !== 1) begin
         @(posedge host_interface_h.clk);
+        host_interface_h.in_config_valid <= 0;
+      end
       host_interface_h.in_config_valid <= 0;
       host_interface_h.in_config_data <= $urandom();
       

@@ -29,6 +29,8 @@ class system_test_base extends uvm_test;
     phase.raise_objection(this);
     cfg_h.wait_for_reset();
     cfg_h.wait_for_clocks(10);
+    //Need to align to the host clock when it is async
+    cfg_h.wait_for_clocks_host(); 
   endtask : run_phase
 
     
