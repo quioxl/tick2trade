@@ -1,58 +1,12 @@
-// Header {{{
-// 
-// File          : feed_dec_avalon64b.sv
-// Date Created  : 01/23/2017
-// Creator       : 
-// Last Modified : 01/23/2017
-// Last Modifier : 
-// Version       : 1.0
-// Description   : Feed Decoder for IMC Assignment
-// References    : IMC Assignment.docx
-//                 Feed Decoder Design Spec.docx (FIXME)
-// -------------------------------------------------------------------------}}}
-// Version Info {{{
-// ----------------------------------------------------------------------------
-// 1.0
-//      - Module Declaration Added
-//         - Parameters: C_PKT_DATA_WIDTH, C_DATA_BYTES, C_EMPTY_WIDTH
-//         - Ports Added based on IMC Assignment.docx
-//         - Header Added
-//         - Version Info Added
-// ----------------------------------------------------------------------------
-// -------------------------------------------------------------------------}}}
-
+// ---------------------------------------------------------------------------
+//
+//  Description: Feed Decoder
+//
+// ---------------------------------------------------------------------------
 module feed_decoder #(
   // Design Parameters {{{
-  // - Parameters below added for future scalability/configurability
-  // - Parameters listed in bytes, as per bit alignment not supported
-  //     C_PKT_DAT_BYTES:
-  //       - Defines the width of the packet data interface
-  //       - Theoretically Supported Values:
-  //         - Minimum is C_MSG_LEN_BYTES+C_MSG_CNT_BYTES
-  //           - Code expects to be able to capture the MSG Length and
-  //             next MSG Count at SOP
-  //       - Tested Values: 8
-  //     C_PKT_MAX_BYTES:
-  //       - Defines the maximum expected packet size
-  //       - Tested Values: 1500
-  //   C_MSG_CNT_BYTES   : 8
-  //   C_MSG_LEN_BYTES   : 8
-  //   C_MSG_MIN_BYTES   : 8
-  //   C_MSG_MAX_BYTES   : 32
-  parameter int C_PKT_BEAT_BYTES  = 8,
-  parameter int C_PKT_MAX_BYTES   = 1500,
-  parameter int C_MSG_CNT_BYTES   = 2,
-  parameter int C_MSG_LEN_BYTES   = 2,
-  parameter int C_MSG_MIN_BYTES   = 8,
-  parameter int C_MSG_MAX_BYTES   = 32,
-  // -----------------------------------------------------------------------}}}
-  // Derived Parameters: {{{
-  // These parameters should not be included in the instantiation, they are
-  // derived from the above parameters
-  parameter int C_PKT_DATA_WIDTH  = C_PKT_BEAT_BYTES*8,
-  parameter int C_PKT_EMPTY_WIDTH = $clog2(C_PKT_BEAT_BYTES),
-  parameter int C_MSG_LEN_WIDTH   = C_MSG_LEN_BYTES*8,
-  parameter int C_MSG_CNT_WIDTH   = C_MSG_CNT_BYTES*8
+  parameter int C_PKT_DATA_WIDTH  = 64,
+  parameter int C_PKT_EMPTY_WIDTH = $clog2(C_PKT_DATA_WIDTH/8)
   // -----------------------------------------------------------------------}}}
 ) (
   // Ports {{{
