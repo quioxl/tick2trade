@@ -81,7 +81,8 @@ module feed_decoder #(
   //             if get_new_beat isn't set.
   always @(posedge clk) begin
     if      (!reset_n)             ld_from_shadow <= 1'b0;
-    else if (in_valid && !in_ready && new_beat.vld) ld_from_shadow <= 1'b1;
+    // else if (in_valid && !in_ready && new_beat.vld) ld_from_shadow <= 1'b1;
+    else if (in_valid && !in_ready && !get_new_beat) ld_from_shadow <= 1'b1;
     else if (get_new_beat)         ld_from_shadow <= 1'b0;
   end
 
@@ -128,8 +129,12 @@ module feed_decoder #(
   //    of a new message isn't in the old_beat
   // 3. If the last beat of the previous message completed
   //    But the som will be in the new_beat on the next cycle
+  // 4. If the eom was already issued for the last message of the 
+  //    packet
+  // 5. If the eom for the last message of the packet is able to
+  //    go out
   assign update_old_beat = !old_beat.vld | 
-                           (vld_nxt & !som_hold) | old_beat.eop |
+                           (vld_nxt & !som_hold) | (old_beat.eop & (vld_nxt | (out_valid & out_endofpacket))) |
                            dly_ld;
 
   // Read pointer should always be sitting within the old_beat, read data is
@@ -161,11 +166,15 @@ module feed_decoder #(
   // The stall condition is if:
   // 1. The eom pointer is going to be in position 0-4 with
   //    an expected som behind it
+  // 2. If we get a stall on the slave i/f cooincident with 
+  //    an internal stall we need an additional cycle to 
+  //    allow for the som to be sent.
   always @(posedge clk) begin
     if (!reset_n) begin
       stall_out <= 1'b0;
     end else begin
-      stall_out <= (rd_ptr[2:0] <= eom_ptr[2:0]) & (eom_que_diff inside {[8:12]}) & !new_beat.eop;
+      stall_out <= ((rd_ptr[2:0] <= eom_ptr[2:0]) & (eom_que_diff inside {[8:12]}) & !new_beat.eop) |
+                   (stall_out & !out_ready);
     end
   end
 
@@ -205,6 +214,9 @@ module feed_decoder #(
   // will be counting bytes opposite of byte numbering
   // The input stream can be thought of as one big queue
   // we are just tracking data pointers from top to bottom.
+  // Want to load on a new message and increment the pointers
+  // whenever a beat goes out. Generally that is when 
+  // old_beat updates...unless old_beat is invlaid.
 
   always @(posedge clk) begin
     if (!reset_n) begin // Need to clear out after packets
@@ -215,7 +227,7 @@ module feed_decoder #(
       que_ptr <= '0;
       rd_ptr  <= nxt_rd_ptr;
       eom_ptr <= nxt_rd_ptr + ({nxt_len[5:0]} -1);
-    end else if (update_old_beat) begin
+    end else if (update_old_beat & old_beat.vld) begin
       que_ptr <= que_ptr + 8;
       rd_ptr  <= rd_ptr  + 8;
     end
@@ -238,16 +250,16 @@ module feed_decoder #(
   // 2. An eom is going out AND
   //    the eom_ptr is not at the end of the queue.
   // If the read pointer is too far down, then need a delayed load
-  assign ld_ptrs     = new_beat.sop | (((eom_nxt & vld_nxt & !eom_at_end) | dly_ld) & out_ready);
+  assign ld_ptrs     = new_beat.sop | ((eom_nxt & vld_nxt & !eom_at_end) & out_ready) | (dly_ld & new_beat.vld);
 
   // The delayed load allows a pointer far down in the new queue
-  // to propagate to the new queue before loading the pointers.
+  // to propagate to the old queue before loading the pointers.
   // In this case, there will be a dead cycle on the bus in
   // order to allow the som to get back up into the old beat.
   // So dly needs to hold off valid and ptr math for a cycle.
   always @(posedge clk) begin
     if (!reset_n) dly_ld <= 0;
-    else          dly_ld <= eom_nxt & eom_at_end;
+    else          dly_ld <= eom_nxt & vld_nxt & eom_at_end;
   end
   
 
