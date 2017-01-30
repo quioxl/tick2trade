@@ -62,7 +62,7 @@ module sef
   assign new_msg = dec_if.valid & dec_if.startofpacket & (dec_if.dec_data.beat1.msg_type == MSG_NEW);
 
   // A valid cycle with no ready will be caught in the shadow registers.
-  assign advance = dec_if.valid & order_if.ready;
+  assign advance = dec_if.valid & order_if_ready;
 
   always @(posedge clk) begin
     if (!reset_n)                        state <= WAIT;
