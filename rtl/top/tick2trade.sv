@@ -38,7 +38,7 @@ module tick2trade #(
 
   );
 
-  localparam int C_PKT_EMPTY_WIDTH = $clog2(C_PKT_DATA_WIDTH);
+  localparam int C_PKT_EMPTY_WIDTH = $clog2(C_PKT_DATA_WIDTH/8);
 
   order_interface order_if2 ();   // Vivado issue with recognizing interfaces in the library running OOC
 
