@@ -7,12 +7,7 @@
 module tick2trade #(
 
   // Feed Decoder params
-  parameter C_PKT_BEAT_BYTES      = 8,
-  parameter C_PKT_MAX_BYTES       = 1500,
-  parameter C_MSG_CNT_BYTES       = 2,
-  parameter C_MSG_LEN_BYTES       = 2,
-  parameter C_MSG_MIN_BYTES       = 8,
-  parameter C_MSG_MAX_BYTES       = 32,
+  parameter C_PKT_DATA_WIDTH      = 64,
 
   //   Strategy Params
   parameter HPB_ASYNC_HOST        = 0,
@@ -43,32 +38,27 @@ module tick2trade #(
 
   );
 
-  localparam int C_DEC_IF_EMPTY_WIDTH = $clog2(C_PKT_BEAT_BYTES);
-  localparam int C_DEC_IF_DATA_WIDTH  = C_PKT_BEAT_BYTES*8;
+  localparam int C_PKT_EMPTY_WIDTH = $clog2(C_PKT_DATA_WIDTH);
 
   order_interface order_if2 ();   // Vivado issue with recognizing interfaces in the library running OOC
 
   // Interface between Feed and Strategy
-  avalon_if #(.DATA_WIDTH  (C_DEC_IF_DATA_WIDTH),
-              .EMPTY_WIDTH (C_DEC_IF_EMPTY_WIDTH)
+  avalon_if #(.DATA_WIDTH  (C_PKT_DATA_WIDTH),
+              .EMPTY_WIDTH (C_PKT_EMPTY_WIDTH)
              ) dec_if ();
 
   //--------------------------------------------------
   // Feed Decoder
   //--------------------------------------------------
   feed_decoder #(
-   .C_PKT_BEAT_BYTES    ( C_PKT_BEAT_BYTES        ),
-   .C_PKT_MAX_BYTES     ( C_PKT_MAX_BYTES         ),
-   .C_MSG_CNT_BYTES     ( C_MSG_CNT_BYTES         ),
-   .C_MSG_LEN_BYTES     ( C_MSG_LEN_BYTES         ),
-   .C_MSG_MIN_BYTES     ( C_MSG_MIN_BYTES         ),
-   .C_MSG_MAX_BYTES     ( C_MSG_MAX_BYTES         )
+   .C_PKT_DATA_WIDTH    ( C_PKT_DATA_WIDTH        )
   )feed_decoder_i (
 
     // Clock/Reset
     .clk                ( clk                     ),
     .reset_n            ( reset_n                 ),
 
+    // Feed input
     .in_ready           ( dec_in_if.ready         ),
     .in_valid           ( dec_in_if.valid         ),
     .in_startofpacket   ( dec_in_if.startofpacket ),
@@ -77,9 +67,7 @@ module tick2trade #(
     .in_empty           ( dec_in_if.empty         ),
     .in_error           ( dec_in_if.error         ),
 
-
-//    .dec_if             ( dec_if                   ),  FIXME - enable if Feed goes to interfaces
-
+    // Output to Strategy
     .out_ready          ( dec_if.ready            ),
     .out_valid          ( dec_if.valid            ),
     .out_startofpacket  ( dec_if.startofpacket    ),
