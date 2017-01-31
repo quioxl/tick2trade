@@ -32,6 +32,7 @@ class strategy_env extends uvm_env;
 
     //Create the analysis components
     predictor_h = strategy_predictor::type_id::create("predictor_h",this);
+    predictor_h.enable_new_order_gen = cfg_h.enable_new_order_gen;
     scoreboard_h = strategy_scoreboard::type_id::create("scoreboard_h",this);
     if (cfg_h.enable_new_order_gen)
       new_order_gen_h = new_order_generator::type_id::create("new_order_gen_h",this);

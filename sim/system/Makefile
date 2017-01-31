@@ -61,3 +61,4 @@ ten_tests:
     $(VISMV_OPTS) \
     ((number = number + 1)) ; \
   done
+	grep FAILED *.log

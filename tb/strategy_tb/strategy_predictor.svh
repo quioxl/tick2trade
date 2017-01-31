@@ -5,6 +5,9 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
 
   int          discarded[string];
 
+  //Config bit
+  bit enable_new_order_gen = 1;
+
   //TLM ports & imps
   uvm_analysis_imp_host #(host_item, strategy_predictor) host_export;
   uvm_analysis_port #(order_item) ap;
@@ -12,6 +15,9 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
   //Structures for holding information programed into the host interface ram
   host_order_t temp_order;
   host_order_t orders[symbol_t];
+
+  //Structures for handling symbol invalidation
+  //symbol_t sent_symbols[$];
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
@@ -95,12 +101,15 @@ class strategy_predictor extends uvm_subscriber #(avalon_seq_item_base);
         if (orders.exists(feed_item.symbol_id)) begin //Check if the symbol has been programmed
           //`uvm_info("STRAT_PRED", $sformatf("Symbol From Feed: 16'h%04x", feed_item.symbol_id) , UVM_MEDIUM)
           order = orders[feed_item.symbol_id];
-          if (feed_item.volume > order.min_vol &&
+          if (order.valid == 1'b1 &&
+              feed_item.volume > order.min_vol &&
               feed_item.volume < order.max_vol &&
               feed_item.price > order.min_price &&
               feed_item.price < order.max_price) begin
             out_order = order_item::type_id::create("out_order");
             out_order.data = order.order;
+            if (enable_new_order_gen) //Invalidate the symbol in the RAM
+              orders[feed_item.symbol_id].valid = 0;
             ap.write(out_order);
           end else begin
             discarded["price_volume"]++;

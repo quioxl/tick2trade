@@ -52,6 +52,7 @@ class system_env extends uvm_env;
     stream_mon_h.cfg_h = cfg_h.master_cfg_h;
     feed_pred_h  = feed_predictor::type_id::create("feed_pred_h",this);
     strat_pred_h = strategy_predictor::type_id::create("strat_pred_h",this);
+    strat_pred_h.enable_new_order_gen = cfg_h.enable_new_order_gen;
     scoreboard_h = strategy_scoreboard::type_id::create("scoreboard_h",this);
     if (cfg_h.enable_new_order_gen)
       new_order_gen_h = new_order_generator::type_id::create("new_order_gen_h",this);
