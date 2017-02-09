@@ -13,5 +13,6 @@ package avalon_pkg;
   `include "avalon_monitor.svh"
   `include "avalon_seq_base.svh"
   `include "avalon_random_seq.svh"
+  `include "avalon_coverage.svh"
   `include "avalon_agent.svh"
 endpackage

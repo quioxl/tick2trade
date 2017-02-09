@@ -67,6 +67,7 @@ module tb;
            );
 
   initial begin
+    $timeformat(-9,5,"ns",7);
     uvm_config_db#(virtual avalon_if)      ::set(null,"*","feed_if", feed_if);
     uvm_config_db#(virtual host_interface) ::set(null,"*","host_if", host_if);
     uvm_config_db#(virtual order_interface)::set(null,"*","order_if", order_if);

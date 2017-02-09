@@ -63,6 +63,7 @@ class feed_scoreboard extends uvm_component;
       `uvm_error("SB",$sformatf("Miscompare!\n  Actual:%s\n  Expect:%s",actual_h.convert2string(),expect_h.convert2string()))
       miscompare_count++;
     end else begin
+      `uvm_info("SB",$sformatf("Match: %s",actual_h.convert2string()),UVM_MEDIUM)
       compare_count++;
     end
   endfunction

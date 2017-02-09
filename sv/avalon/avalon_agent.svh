@@ -12,6 +12,8 @@ class avalon_agent extends uvm_agent;
   avalon_driver_base driver_h;
   avalon_monitor monitor_h;
   uvm_sequencer #(avalon_seq_item_base) seqr_h;
+
+  avalon_coverage cov_h;
   
   uvm_analysis_port #(avalon_seq_item_base) ap;
 
@@ -34,6 +36,7 @@ class avalon_agent extends uvm_agent;
       driver_h.cfg_h = cfg_h;
       seqr_h = new("seqr_h",this);
     end
+    cov_h = avalon_coverage::type_id::create("cov_h",this);
     monitor_h = avalon_monitor::type_id::create("monitor_h",this);
     monitor_h.cfg_h = cfg_h;
     ap = new("ap",this);
@@ -45,6 +48,7 @@ class avalon_agent extends uvm_agent;
       driver_h.seq_item_port.connect(seqr_h.seq_item_export);
     end
     monitor_h.ap.connect(ap);
+    monitor_h.ap.connect(cov_h.analysis_export);
   endfunction
 
 endclass
